@@ -101,3 +101,6 @@ class Installer
         return $cfg;
     }
 }
+
+$installer = new Installer();
+$installer->install();
