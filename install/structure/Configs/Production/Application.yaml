@@ -1,0 +1,4 @@
+Application:
+  Environment: production
+  AbsolutePath: {ABS_PATH}
+  WebPath: {DOMAIN}
