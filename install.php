@@ -7,17 +7,24 @@ class Installer
     use \Webiny\Component\StdLib\StdLibTrait;
 
     private $domain;
+    private $domainHost;
     private $databaseName = 'Webiny';
     private $absPath;
     private $errorLog;
+    private $sitesEnabled = '/etc/nginx/sites-enabled/';
+    private $sitesAvailable = '/etc/nginx/sites-available/';
 
-    function construct()
+    private $hostPath;
+
+    public function __construct()
     {
-        $this->absPath = getcwd();
+        $this->absPath = getcwd() . '/';
     }
 
     public function install()
     {
+        \cli\line("\nWelcome to Webiny Setup Wizard");
+        \cli\line("==============================\n");
         $this->collectData();
         $this->createFolders();
         $this->installCoreApp();
@@ -28,26 +35,45 @@ class Installer
     private function collectData()
     {
         do {
-            $this->domain = \cli\prompt('What is your development domain?', null, ':');
+            $this->domain = \cli\prompt('What is your development domain?', null, ': ');
         } while (!$this->domain);
 
-        $this->errorLog = '/var/log/nginx/' . $this->domain . '-error.log';
-        $this->databaseName = \cli\prompt('What is your database name?', 'Webiny', ':');
+        if (!$this->str($this->domain)->startsWith('http://') && !$this->str($this->domain)->startsWith('https://')) {
+            $this->domain = 'http://' . $this->domain;
+        }
+
+        $this->domainHost = $this->url($this->domain)->getHost();
+        $this->errorLog = '/var/log/nginx/' . $this->domainHost . '-error.log';
+        $this->databaseName = \cli\prompt('What is your database name?', 'Webiny', ': ');
     }
 
     private function createFolders()
     {
-        \cli\line('Creating necessary folder structure in %g' . $this->absPath . '%n');
-        exec('cp -R ./install/structure/* ' . $this->absPath);
-        mkdir($this->absPath . '/Apps');
-        mkdir($this->absPath . '/Cache');
-        mkdir($this->absPath . '/Temp');
+        \cli\line("\nCreating necessary folder structure in %m{$this->absPath}%n");
+        exec('cp -R ' . __DIR__ . '/install/structure/public_html ' . $this->absPath);
+        exec('cp -R ' . __DIR__ . '/install/structure/Configs ' . $this->absPath);
+
+        if (!file_exists($this->absPath . 'Apps')) {
+            mkdir($this->absPath . 'Apps');
+        }
+
+        if (!file_exists($this->absPath . 'Cache')) {
+            mkdir($this->absPath . 'Cache');
+        }
+
+        if (!file_exists($this->absPath . 'Temp')) {
+            mkdir($this->absPath . 'Temp');
+        }
     }
 
     private function installCoreApp()
     {
-        \cli\line('Cloning %gwebiny/core%n app...');
-        exec('git clone https://github.com/Webiny/Core.git Apps/Core');
+        if (file_exists($this->absPath . 'Apps/Core')) {
+            return;
+        }
+
+        \cli\line('Cloning %mwebiny/core%n app...');
+        exec('git clone https://github.com/Webiny/Core.git ' . $this->absPath . 'Apps/Core');
     }
 
     private function createConfigs()
@@ -59,20 +85,57 @@ class Installer
 
     private function createHost()
     {
-        $deployHost = \cli\choose('Would you like to create a virtual host for your domain?', 'yn', 'y');
+        $deployHost = \cli\choose('Would you like to create a virtual host for your domain', 'yn', 'y');
         if ($deployHost) {
             $host = $this->injectVars(__DIR__ . '/install/hosts/host.cfg', false);
 
-            $hostPath = '/etc/nginx/sites-available';
-            $hostPath = \cli\prompt('Where do you want to place your host file?', $hostPath, $marker = ':');
+            $hostPath = $this->sitesAvailable;
+            $hostPath = \cli\prompt('Where do you want to place your host file?', $hostPath, $marker = ': ');
+            $this->hostPath = $this->str($hostPath)->trimRight('/')->append('/')->val();
+            file_put_contents(__DIR__ . '/host.tmp', $host);
 
-            $hostPath .= '/' . $this->domain;
-            file_put_contents($hostPath, $host);
-            symlink($hostPath, '/etc/nginx/sites-enabled/' . $this->domain);
+            $hostPath = $this->hostPath . $this->domainHost;
 
-            \cli\line("\nIMPORTANT: since we added a new host, you need to reload your nginx! Run: %gsudo service nginx reload%n");
-            \cli\line("\nReloading nginx to enable your new host...");
+            if (file_exists($hostPath)) {
+                $options = [
+                    'auto'      => 'Auto-generate a file name',
+                    'rename'    => 'Enter a different file name',
+                    'finish'    => 'Leave the existing file and finish host setup',
+                    'overwrite' => 'Overwrite existing file'
+                ];
+
+                \cli\line("\nA file %m{$hostPath}%n already exists!");
+                $choice = \cli\menu($options, null, 'What should I do?');
+                switch ($choice) {
+                    case 'overwrite':
+                        break;
+                    case 'rename':
+                        $fileName = \cli\prompt('Enter a host file name', null, $marker = ': ');
+                        $hostPath = $this->hostPath . $fileName;
+                        break;
+                    case 'finish':
+                        return;
+                    default:
+                        $hostPath .= '-webiny-' . date('mdHis');
+                }
+            }
+
+            exec('sudo cp ' . __DIR__ . '/host.tmp ' . $hostPath);
+            \cli\line("Created host file: %c$hostPath%n");
+
+            $link = $this->sitesEnabled . $this->domainHost;
+            if (file_exists($link)) {
+                exec("sudo unlink $link");
+            }
+
+            \cli\line("Symlink: %c$link%n -> %c$hostPath%n");
+
+            exec('sudo ln -s ' . $hostPath . ' ' . $link);
+            \cli\line("Attempting to reload nginx to enable your new host (%csudo service nginx reload%n)");
             exec('sudo service nginx reload');
+
+            unlink(__DIR__ . '/host.tmp');
+            \cli\line("\n%mIMPORTANT%n: If using a VM, make sure you add a rule for %c{$this->domainHost}%n domain on your host machine!");
         }
     }
 
@@ -81,14 +144,15 @@ class Installer
         if ($this->str($filePath)->startsWith('/')) {
             $path = $filePath;
         } else {
-            $path = $this->absPath . '/' . $filePath;
+            $path = $this->absPath . $filePath;
         }
 
         $vars = [
-            '{ABS_PATH}' => $this->absPath,
-            '{DOMAIN}' => $this->domain,
+            '{ABS_PATH}'      => $this->absPath,
+            '{DOMAIN}'        => $this->domain,
+            '{DOMAIN_HOST}'   => $this->domainHost,
             '{DATABASE_NAME}' => $this->databaseName,
-            '{ERROR_LOG}' => $this->errorLog
+            '{ERROR_LOG}'     => $this->errorLog
         ];
 
         $cfg = file_get_contents($path);
