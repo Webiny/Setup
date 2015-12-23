@@ -1,5 +1,5 @@
 {
-    "name": "webiny/core",
+    "name": "webiny/setup",
     "require": {
         "webiny/framework": "dev-master",
         "wp-cli/php-cli-tools": "dev-master"
