@@ -1,14 +1,25 @@
+var path = require('path');
+
 module.exports = function (gulp, opts, $) {
 
     var pipes = {};
 
-    pipes.babelProcess = function (moduleName) {
+    pipes.babelProcess = function (appObj, moduleName) {
         return $.lazypipe()
             .pipe(function () {
                 var babelOpts = {
-                    modules: 'system',
                     moduleIds: true,
-                    compact: false
+                    compact: false,
+                    plugins: [
+                        "transform-es2015-modules-systemjs"
+                    ],
+                    presets: ["es2015", "react"],
+                    getModuleId: function (moduleName) {
+                        return $.webinyAssets.getModuleId(appObj, moduleName);
+                    },
+                    resolveModuleSource: function (source, filename) {
+                        return $.webinyAssets.resolveModuleSource(appObj, source, filename);
+                    }
                 };
 
                 if (moduleName) {
@@ -26,7 +37,13 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.orderedVendorScripts = function (appObj) {
-        return $.order(opts.config.vendorsOrder, {base: appObj.sourceDir + '/Assets'});
+        var config = $.webiny.readAssetsConfig(appObj);
+        return $.order(config.getVendors(), {base: appObj.sourceDir + '/Assets'});
+    };
+
+    pipes.orderedStyles = function (appObj) {
+        var config = $.webiny.readAssetsConfig(appObj);
+        return $.order(config.getStyles(), {base: appObj.sourceDir + '/Assets'});
     };
 
     pipes.minifiedFileName = function () {
@@ -41,7 +58,7 @@ module.exports = function (gulp, opts, $) {
             .pipe($.eslint(opts.config.eslint))
             .pipe($.eslint.format())
             .pipe($.duration(moduleObj.name + ' module'))
-            .pipe(pipes.babelProcess(moduleObj.name))
+            .pipe(pipes.babelProcess(appObj, moduleObj.name))
             .pipe($.concat(moduleObj.name + '.min.js'))
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
@@ -52,7 +69,7 @@ module.exports = function (gulp, opts, $) {
             .pipe($.eslint(opts.config.eslint))
             .pipe($.eslint.format())
             .pipe($.duration('App scripts'))
-            .pipe(pipes.babelProcess())
+            .pipe(pipes.babelProcess(appObj))
             .pipe($.concat('app.min.js'))
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
@@ -67,7 +84,7 @@ module.exports = function (gulp, opts, $) {
                 .pipe($.duration('App scripts'))
                 .pipe($.webinyAssets.module(appObj))
                 .pipe($.sourcemaps.init())
-                .pipe(pipes.babelProcess())
+                .pipe(pipes.babelProcess(appObj))
                 .pipe($.concat('app.min.js'))
                 .pipe($.ifElse(opts.production, function () {
                     return $.uglify({mangle: false});
@@ -112,7 +129,10 @@ module.exports = function (gulp, opts, $) {
             .pipe(es6Filter)
             .pipe($.eslint(opts.config.eslint))
             .pipe($.eslint.format())
-            .pipe(pipes.babelProcess())
+            .pipe($.rename(function(path){
+                path.basename = path.basename.replace('.es6', '');
+            }))
+            .pipe(pipes.babelProcess(appObj))
             .pipe(es6Filter.restore())
             // JS
             .pipe(jsFilter)
@@ -155,6 +175,7 @@ module.exports = function (gulp, opts, $) {
     pipes.buildStyles = function (appObj) {
         return gulp.src(opts.config.paths.styles(appObj.sourceDir))
             .pipe($.duration('Styles'))
+            .pipe(pipes.orderedStyles(appObj))
             .pipe($.replace('../../', ''))
             .pipe($.concat('styles.css'))
             .pipe($.ifElse(opts.production, function () {

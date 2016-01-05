@@ -39,18 +39,6 @@ module.exports = function (gulp, opts, $, pipes) {
                 return parseValues(paths.images, sourceAppDir);
             }
         },
-        vendorsOrder: [
-            "bower_components/system.js/dist/system.js",
-            "bower_components/jquery/dist/jquery.js",
-            "bower_components/jquery-ui/dist/jquery-ui.js",
-            "bower_components/bootstrap/dist/js/bootstrap.js",
-            "bower_components/bootstrap/dist/css/bootstrap.css",
-            "bower_components/moment/moment.js",
-            "bower_components/lodash/lodash.js",
-            "custom_components/react/react.js",
-            "custom_components/react/react-dom.js",
-            "custom_components/react/react-dom-server.js"
-        ],
         eslint: {
             "extends": "airbnb",
             "rules": {
