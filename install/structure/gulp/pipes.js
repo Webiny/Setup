@@ -194,7 +194,7 @@ module.exports = function (gulp, opts, $) {
 
     pipes.buildImages = function (appObj) {
         return gulp.src(opts.config.paths.images(appObj.sourceDir))
-            .pipe(gulp.dest(appObj.buildDir + '/img/'));
+            .pipe(gulp.dest(appObj.buildDir + '/images/'));
     };
 
     pipes.buildJsApp = function (appObj) {
@@ -208,12 +208,14 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.buildApp = function (app, jsApp) {
-        return $.webiny.getApps(app, jsApp).map(function (appObj) {
+        return Promise.all($.webiny.getApps(app, jsApp).map(function (appObj) {
             $.webinyAssets.app(appObj);
-            return pipes.buildJsApp(appObj).on('end', function () {
-                $.webinyAssets.write(appObj);
+            return new Promise(function(resolve, reject){
+                pipes.buildJsApp(appObj).on('end', function () {
+                    $.webinyAssets.write(appObj, resolve);
+                }).on('error', reject);
             });
-        });
+        }));
     };
 
     return pipes;

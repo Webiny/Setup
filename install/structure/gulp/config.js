@@ -4,7 +4,7 @@ module.exports = function (gulp, opts, $, pipes) {
         scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*"],
         styles: ["Assets/styles/**/*.{css,less}"],
         fonts: ["Assets/fonts/**/*", "!Assets/fonts/**/*.{css,less}"],
-        images: ["Assets/img/**/*"]
+        images: ["Assets/images/**/*"]
     };
 
     var parseValues = function (values, sourceAppDir) {
@@ -51,7 +51,9 @@ module.exports = function (gulp, opts, $, pipes) {
                 "new-cap": 0,
                 "no-param-reassign": 0,
                 "radix": [2, "as-needed"],
-                "no-console": 0
+                "no-console": 0,
+                "eol-last": 0,
+                "dot-notation": 0
             },
             "globals": {
                 "jQuery": false,

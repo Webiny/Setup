@@ -2,6 +2,45 @@ var through = require('through2');
 var fs = require('fs');
 var path = require('path');
 
+function fileExists(file, cb) {
+    try {
+        fs.statSync(file);
+        return cb();
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+function readModule(name, dir) {
+    var config = {
+        name: name,
+        folders: [],
+        module: false,
+        routes: false
+    };
+
+    var systemFolders = ['Actions', 'Components', 'Views'];
+    var systemFiles = ['Routes.js', 'Module.js'];
+
+    // Read folders
+    systemFolders.map(function (folder) {
+        fileExists(dir + '/' + folder + '/' + folder + '.js', function () {
+            config.folders.push(folder);
+        });
+    });
+
+    systemFiles.map(function (file) {
+        fileExists(dir + '/' + file, function () {
+            var key = file.replace('.js', '').toLowerCase();
+            config[key] = true;
+        });
+    });
+
+    return config;
+}
+
+
 module.exports = function (gulp, opts, $) {
     var assets = {};
 
@@ -13,13 +52,11 @@ module.exports = function (gulp, opts, $) {
                     js: [],
                     css: []
                 },
-                modules: []
+                modules: {}
             };
         },
 
         add: function (appObj) {
-            // TODO: add /build/{env} path to make it absolute. That way we can simplify JS bootstrap even further
-
             return through.obj(function (file, encoding, callback) {
                 var type = file.path.split('.').pop();
 
@@ -37,7 +74,7 @@ module.exports = function (gulp, opts, $) {
             });
         },
 
-        write: function (appObj) {
+        write: function (appObj, then) {
             var path = opts.buildDir + appObj.name.replace('.', '/') + '/meta.json';
             var data = assets[appObj.name];
             fs.writeFile(path, JSON.stringify(data, null, 4), function (err) {
@@ -45,17 +82,20 @@ module.exports = function (gulp, opts, $) {
                     console.log(err);
                 } else {
                     $.util.log("App meta saved to " + path);
+                    then();
                 }
             });
         },
 
         module: function (appObj) {
             return through.obj(function (file, encoding, callback) {
-                if (file.path.indexOf('/Module.js') > -1) {
-                    var moduleParts = file.path.split('/Modules/').pop().split('/');
-                    if (moduleParts.length === 2) {
+                if (file.path.indexOf('/Modules/') > -1) {
+                    var paths = file.path.split('/Modules/');
+                    var moduleParts = paths.pop().split('/');
+                    if (!$._.has(assets[appObj.name].modules, moduleParts[0])) {
                         // We have our module name
-                        assets[appObj.name].modules.push(moduleParts[0]);
+                        var modulePath = paths[0] + '/Modules/' + moduleParts[0];
+                        assets[appObj.name].modules[moduleParts[0]] = readModule(moduleParts[0], modulePath);
                     }
                 }
                 callback(null, file);
