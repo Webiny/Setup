@@ -209,7 +209,7 @@ class Installer
         $user->password = $this->userPassword;
         $user->firstName = '';
         $user->lastName = '';
-        $user->groups = [$adminGroup];
+        $user->groups = [$adminGroup->id];
         $user->save();
     }
 
