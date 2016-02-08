@@ -1,5 +1,9 @@
 <?php
 
+use Apps\Core\Php\Entities\User;
+use Apps\Core\Php\Entities\UserGroup;
+use Webiny\Component\StdLib\Exception\ExceptionAbstract;
+
 $autoloader = require_once getcwd() . '/vendor/autoload.php';
 
 class Installer
@@ -74,6 +78,7 @@ class Installer
         $this->installCoreApp();
         $this->createConfigs();
         $this->createHost();
+        $this->setupEntitiesAndIndexes();
         $this->createUser();
     }
 
@@ -197,20 +202,40 @@ class Installer
         \Apps\Core\Php\Bootstrap\Bootstrap::getInstance();
 
         // Create 'public' and 'administrators' user groups
-        $publicGroup = new \Apps\Core\Php\Entities\UserGroup();
-        $publicGroup->populate($this->publicUserGroup)->save();
+        try {
+            $publicGroup = new UserGroup();
+            $publicGroup->populate($this->publicUserGroup)->save();
+        } catch (ExceptionAbstract $e) {
+            // Public group exists
+        }
 
-        $adminGroup = new \Apps\Core\Php\Entities\UserGroup();
-        $adminGroup->populate($this->adminUserGroup)->save();
+        try {
+            $adminGroup = new UserGroup();
+            $adminGroup->populate($this->adminUserGroup)->save();
+        } catch (ExceptionAbstract $e) {
+            // Admin group exists
+            $adminGroup = UserGroup::findOne(['tag' => 'administrators']);
+        }
 
         // Create admin user
-        $user = new \Apps\Core\Php\Entities\User();
-        $user->email = $this->userEmail;
-        $user->password = $this->userPassword;
-        $user->firstName = '';
-        $user->lastName = '';
-        $user->groups = [$adminGroup->id];
-        $user->save();
+        try {
+            $user = new User();
+            $user->email = $this->userEmail;
+            $user->password = $this->userPassword;
+            $user->firstName = '';
+            $user->lastName = '';
+            $user->groups = [$adminGroup->id];
+            $user->save();
+        } catch (ExceptionAbstract $e) {
+            // User exists
+            \cli\line("\n%mWARNING%n: An admin user with email %c{$this->userEmail}%n already exists!");
+        }
+    }
+
+    private function setupEntitiesAndIndexes()
+    {
+        User::wInstall();
+        UserGroup::wInstall();
     }
 
     private function injectVars($filePath, $autoSave = true)
