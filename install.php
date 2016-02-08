@@ -198,10 +198,10 @@ class Installer
 
         // Create 'public' and 'administrators' user groups
         $publicGroup = new \Apps\Core\Php\Entities\UserGroup();
-        $publicGroup->populate($this->publicUserGroup);
+        $publicGroup->populate($this->publicUserGroup)->save();
 
         $adminGroup = new \Apps\Core\Php\Entities\UserGroup();
-        $adminGroup->populate($this->adminUserGroup);
+        $adminGroup->populate($this->adminUserGroup)->save();
 
         // Create admin user
         $user = new \Apps\Core\Php\Entities\User();
