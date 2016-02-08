@@ -2,5 +2,5 @@ Application:
   Environment: production
   AbsolutePath: {ABS_PATH}
   WebPath: {DOMAIN}
-  ApiPath: http://selecto.app/api
+  ApiPath: {DOMAIN}/api
   Backend: admin

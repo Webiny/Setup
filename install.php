@@ -134,7 +134,7 @@ class Installer
     private function createHost()
     {
         $deployHost = \cli\choose('Would you like to create a virtual host for your domain', 'yn', 'y');
-        if ($deployHost) {
+        if ($deployHost === 'y') {
             $host = $this->injectVars(__DIR__ . '/install/hosts/host.cfg', false);
 
             $hostPath = $this->sitesAvailable;
