@@ -2,7 +2,8 @@
     "name": "webiny/setup",
     "require": {
         "webiny/framework": "dev-master",
-        "wp-cli/php-cli-tools": "dev-master"
+        "wp-cli/php-cli-tools": "dev-master",
+        "webiny/login": "dev-master"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

@@ -1,6 +1,6 @@
 <?php
 
-require_once getcwd() . '/vendor/autoload.php';
+$autoloader = require_once getcwd() . '/vendor/autoload.php';
 
 class Installer
 {
@@ -13,11 +13,54 @@ class Installer
     private $errorLog;
     private $sitesEnabled = '/etc/nginx/sites-enabled/';
     private $sitesAvailable = '/etc/nginx/sites-available/';
-
+    private $userEmail;
+    private $userPassword;
     private $hostPath;
 
-    public function __construct()
+    private $publicUserGroup = [
+        'name'        => 'Public',
+        'tag'         => 'public',
+        'permissions' => [
+            'entities' => [
+                'Apps\\Core\\Php\\Entities\\User' => [
+                    'login' => [
+                        'post' => true
+                    ]
+                ]
+            ],
+            'services' => [
+                'Apps\\Core\\Php\\Services\\Apps' => [
+                    'index' => [
+                        'get' => true
+                    ]
+                ]
+            ]
+        ]
+    ];
+    private $adminUserGroup = [
+        'name'        => 'Administrators',
+        'tag'         => 'administrators',
+        'permissions' => [
+            'entities' => [
+                'Apps\\Core\\Php\\Entities\\User' => [
+                    'create' => true,
+                    'read'   => true,
+                    'update' => true,
+                    'delete' => true,
+                    'login'  => [
+                        'post' => true
+                    ],
+                    'me'     => [
+                        'get' => true
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    public function __construct($autoloader)
     {
+        $this->autoloader = $autoloader;
         $this->absPath = getcwd() . '/';
     }
 
@@ -25,11 +68,13 @@ class Installer
     {
         \cli\line("\nWelcome to Webiny Setup Wizard");
         \cli\line("==============================\n");
+
         $this->collectData();
         $this->createFolders();
         $this->installCoreApp();
         $this->createConfigs();
         $this->createHost();
+        $this->createUser();
     }
 
     private function collectData()
@@ -45,6 +90,9 @@ class Installer
         $this->domainHost = $this->url($this->domain)->getHost();
         $this->errorLog = '/var/log/nginx/' . $this->domainHost . '-error.log';
         $this->databaseName = \cli\prompt('What is your database name?', 'Webiny', ': ');
+
+        $this->userEmail = \cli\prompt('What is your admin user email?', null, ': ');
+        $this->userPassword = \cli\prompt('What is your admin user password?', null, ': ', true);
     }
 
     private function createFolders()
@@ -139,6 +187,32 @@ class Installer
         }
     }
 
+    private function createUser()
+    {
+        $_SERVER = [];
+        $_SERVER['SERVER_NAME'] = $this->domain;
+        $this->autoloader->addPsr4('Apps\\Core\\', $this->absPath . 'Apps/Core');
+
+        // Bootstrap the system using newly generated config
+        \Apps\Core\Php\Bootstrap\Bootstrap::getInstance();
+
+        // Create 'public' and 'administrators' user groups
+        $publicGroup = new \Apps\Core\Php\Entities\UserGroup();
+        $publicGroup->populate($this->publicUserGroup);
+
+        $adminGroup = new \Apps\Core\Php\Entities\UserGroup();
+        $adminGroup->populate($this->adminUserGroup);
+
+        // Create admin user
+        $user = new \Apps\Core\Php\Entities\User();
+        $user->email = $this->userEmail;
+        $user->password = $this->userPassword;
+        $user->firstName = '';
+        $user->lastName = '';
+        $user->groups = [$adminGroup];
+        $user->save();
+    }
+
     private function injectVars($filePath, $autoSave = true)
     {
         if ($this->str($filePath)->startsWith('/')) {
@@ -166,5 +240,5 @@ class Installer
     }
 }
 
-$installer = new Installer();
+$installer = new Installer($autoloader);
 $installer->install();
