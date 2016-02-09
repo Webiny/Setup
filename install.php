@@ -78,6 +78,7 @@ class Installer
         $this->installCoreApp();
         $this->createConfigs();
         $this->createHost();
+        $this->autoloader->addPsr4('Apps\\Core\\', $this->absPath . 'Apps/Core');
         $this->setupEntitiesAndIndexes();
         $this->createUser();
     }
@@ -147,6 +148,8 @@ class Installer
             $this->hostPath = $this->str($hostPath)->trimRight('/')->append('/')->val();
             file_put_contents(__DIR__ . '/host.tmp', $host);
 
+            mkdir($this->hostPath, 0755, true);
+
             $hostPath = $this->hostPath . $this->domainHost;
 
             if (file_exists($hostPath)) {
@@ -196,7 +199,6 @@ class Installer
     {
         $_SERVER = [];
         $_SERVER['SERVER_NAME'] = $this->domain;
-        $this->autoloader->addPsr4('Apps\\Core\\', $this->absPath . 'Apps/Core');
 
         // Bootstrap the system using newly generated config
         \Apps\Core\Php\Bootstrap\Bootstrap::getInstance();
