@@ -148,7 +148,9 @@ class Installer
             $this->hostPath = $this->str($hostPath)->trimRight('/')->append('/')->val();
             file_put_contents(__DIR__ . '/host.tmp', $host);
 
-            mkdir($this->hostPath, 0755, true);
+            if (!file_exists($this->hostPath)) {
+                mkdir($this->hostPath, 0755, true);
+            }
 
             $hostPath = $this->hostPath . $this->domainHost;
 
