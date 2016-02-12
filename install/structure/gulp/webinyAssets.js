@@ -46,14 +46,19 @@ module.exports = function (gulp, opts, $) {
 
     return {
         app: function (appObj) {
-            assets[appObj.name] = {
+            assets[appObj.key] = {
                 name: appObj.name,
+                version: appObj.version || null,
                 assets: {
                     js: [],
                     css: []
                 },
                 modules: {}
             };
+
+            if (!appObj.version) {
+                delete assets[appObj.key].version;
+            }
         },
 
         add: function (appObj) {
@@ -64,9 +69,15 @@ module.exports = function (gulp, opts, $) {
                 if (['js', 'css'].indexOf(type) > -1) {
                     // Add asset to meta
                     var buildPath = opts.production ? '/build/production/' : '/build/development/';
-                    var asset = file.path.split(appObj.name.replace('.', '/')).pop();
-                    var assetPath = buildPath + appObj.name.replace('.', '/') + asset;
-                    assets[appObj.name].assets[type].push(assetPath);
+                    var asset = file.path.split(appObj.path).pop();
+
+                    var replaceBy = '/';
+                    if (appObj.version) {
+                        replaceBy = '/' + appObj.version + '/';
+                    }
+
+                    var assetPath = buildPath + appObj.path + asset;
+                    assets[appObj.key].assets[type].push(assetPath);
                 }
 
                 // Continue with pipe...
@@ -75,8 +86,12 @@ module.exports = function (gulp, opts, $) {
         },
 
         write: function (appObj, then) {
-            var path = opts.buildDir + appObj.name.replace('.', '/') + '/meta.json';
-            var data = assets[appObj.name];
+            var delim = '/';
+            if (appObj.version) {
+                delim = '/' + appObj.version + '/';
+            }
+            var path = opts.buildDir + appObj.name.replace('.', delim) + '/meta.json';
+            var data = assets[appObj.key];
             fs.writeFile(path, JSON.stringify(data, null, 4), function (err) {
                 if (err) {
                     console.log(err);
@@ -92,10 +107,10 @@ module.exports = function (gulp, opts, $) {
                 if (file.path.indexOf('/Modules/') > -1) {
                     var paths = file.path.split('/Modules/');
                     var moduleParts = paths.pop().split('/');
-                    if (!$._.has(assets[appObj.name].modules, moduleParts[0])) {
+                    if (!$._.has(assets[appObj.key].modules, moduleParts[0])) {
                         // We have our module name
                         var modulePath = paths[0] + '/Modules/' + moduleParts[0];
-                        assets[appObj.name].modules[moduleParts[0]] = readModule(moduleParts[0], modulePath);
+                        assets[appObj.key].modules[moduleParts[0]] = readModule(moduleParts[0], modulePath);
                     }
                 }
                 callback(null, file);
@@ -138,7 +153,24 @@ module.exports = function (gulp, opts, $) {
             // Relative sources should be resolved to the appropriate absolute paths
             if (source.indexOf('./') === 0) {
                 var appPrefix = appObj.name.replace('.', '/');
-                var delim = appObj.name.replace('.', '/Js/');
+                var parts = appObj.key.split('.');
+
+                var delim = '';
+
+                // If app key consists of 2 parts - it's a Core app and it does not have a version in its path
+                // Otherwise - it's an app with version number in its path
+
+                if (parts.length === 2) {
+                    // part[0] = App name
+                    // part[1] = JS app name
+                    delim = parts[0] + '/Js/' + parts[1];
+                } else {
+                    // part[0] = App name
+                    // part[1] = JS app name
+                    // part[2] = version number (ie: v1.1)
+                    delim = parts[0] + '/' + parts[2] + '/Js/' + parts[1];
+                }
+
                 var dir = path.dirname(filename.split(delim).pop());
                 return appPrefix + dir + source.replace('./', '/');
             }

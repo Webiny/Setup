@@ -46,12 +46,6 @@ module.exports = function (gulp, opts, $) {
         return $.order(config.getStyles(), {base: appObj.sourceDir + '/Assets'});
     };
 
-    pipes.minifiedFileName = function () {
-        return $.rename(function (path) {
-            path.extname = '.min' + path.extname;
-        });
-    };
-
     pipes.buildModuleScripts = function (appObj, moduleObj) {
         return gulp.src(moduleObj.scripts)
             .pipe($.webinyAssets.module(appObj))
@@ -59,7 +53,8 @@ module.exports = function (gulp, opts, $) {
             .pipe($.eslint.format())
             .pipe($.duration(moduleObj.name + ' module'))
             .pipe(pipes.babelProcess(appObj, moduleObj.name))
-            .pipe($.concat(moduleObj.name + '.min.js'))
+            .pipe($.concat(moduleObj.name + '.js'))
+            .pipe($.rev())
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
     };
@@ -70,14 +65,15 @@ module.exports = function (gulp, opts, $) {
             .pipe($.eslint.format())
             .pipe($.duration('App scripts'))
             .pipe(pipes.babelProcess(appObj))
-            .pipe($.concat('app.min.js'))
+            .pipe($.concat('app.js'))
+            .pipe($.rev())
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
     };
 
     pipes.buildAppScripts = function (appObj) {
         if (opts.production) {
-            // If in production mode - will build entire app directory into app.min.js
+            // If in production mode - will build entire app directory into app.js
             return gulp.src(opts.config.paths.scripts(appObj.sourceDir))
                 .pipe($.eslint(opts.config.eslint))
                 .pipe($.eslint.format())
@@ -85,15 +81,16 @@ module.exports = function (gulp, opts, $) {
                 .pipe($.webinyAssets.module(appObj))
                 .pipe($.sourcemaps.init())
                 .pipe(pipes.babelProcess(appObj))
-                .pipe($.concat('app.min.js'))
+                .pipe($.concat('app.js'))
                 .pipe($.ifElse(opts.production, function () {
                     return $.uglify({mangle: false});
                 }))
+                .pipe($.rev())
                 .pipe($.sourcemaps.write('.'))
                 .pipe(gulp.dest(appObj.buildDir + '/scripts'))
                 .pipe($.webinyAssets.add(appObj));
         } else {
-            // If in development mode - will build each module separately and remaining app scripts into app.min.js
+            // If in development mode - will build each module separately and remaining app scripts into app.js
 
             var modules = [];
             appObj.modules.map(function (moduleObj) {
@@ -137,10 +134,11 @@ module.exports = function (gulp, opts, $) {
             // JS
             .pipe(jsFilter)
             .pipe(pipes.orderedVendorScripts(appObj))
-            .pipe($.concat('vendors.min.js'))
+            .pipe($.concat('vendors.js'))
             .pipe($.ifElse(opts.production, function () {
                 return $.uglify({mangle: false});
             }))
+            .pipe($.rev())
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj))
             .pipe(jsFilter.restore())
@@ -150,10 +148,11 @@ module.exports = function (gulp, opts, $) {
             .pipe($.sourcemaps.init())
             .pipe($.less())
             .pipe(pipes.orderedVendorScripts(appObj))
-            .pipe($.concat('vendors.min.css'))
+            .pipe($.concat('vendors.css'))
             .pipe($.ifElse(opts.production, function () {
                 return $.minifyCss();
             }))
+            .pipe($.rev())
             .pipe($.sourcemaps.write())
             .pipe(gulp.dest(appObj.buildDir + '/css'))
             .pipe($.webinyAssets.add(appObj))
@@ -181,7 +180,7 @@ module.exports = function (gulp, opts, $) {
             .pipe($.ifElse(opts.production, function () {
                 return $.minifyCss();
             }))
-            .pipe(pipes.minifiedFileName())
+            .pipe($.rev())
             .pipe(gulp.dest(appObj.buildDir + '/css'))
             .pipe($.webinyAssets.add(appObj));
     };

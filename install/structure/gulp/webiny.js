@@ -26,7 +26,7 @@ module.exports = function (gulp, opts, $) {
         }
     }
 
-    function readJsApps(app, jsApp, dir) {
+    function readJsApps(app, jsApp, dir, version) {
         var jsApps = [];
         getFolders(dir).map(function (jsAppFolder) {
             if (jsApp && jsApp != jsAppFolder) {
@@ -41,12 +41,25 @@ module.exports = function (gulp, opts, $) {
                 });
             });
 
-            jsApps.push({
+            var buildDir = opts.buildDir + app + '/' + jsAppFolder;
+            if (version) {
+                buildDir = opts.buildDir + app + '/' + version + '/' + jsAppFolder;
+            }
+
+            var appMeta = {
+                key: app + '.' + jsAppFolder + (version ? '.' + version : ''),
                 name: app + '.' + jsAppFolder,
-                buildDir: opts.buildDir + app + '/' + jsAppFolder,
+                path: app + '/' + (version ? version + '/' : '') + jsAppFolder,
+                buildDir: buildDir,
                 sourceDir: dir + '/' + jsAppFolder,
                 modules: modules
-            });
+            };
+
+            if (version) {
+                appMeta.version = version;
+            }
+
+            jsApps.push(appMeta);
         });
 
         return jsApps;
@@ -62,10 +75,20 @@ module.exports = function (gulp, opts, $) {
 
             var jsApps = [];
             getFolders(dir).map(function (app) {
-                var dir = './Apps/' + app + '/Js';
-                readJsApps(app, jsApp, dir).map(function (appObj) {
-                    jsApps.push(appObj);
-                });
+                var versionsDir = './Apps/' + app;
+                if (app === 'Core') {
+                    var dir = versionsDir + '/Js';
+                    readJsApps(app, jsApp, dir, null).map(function (appObj) {
+                        jsApps.push(appObj);
+                    });
+                } else {
+                    getFolders(versionsDir).map(function (version) {
+                        var dir = versionsDir + '/' + version + '/Js';
+                        readJsApps(app, jsApp, dir, version).map(function (appObj) {
+                            jsApps.push(appObj);
+                        });
+                    });
+                }
             });
 
             return jsApps;
