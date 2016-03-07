@@ -226,8 +226,7 @@ class Installer
             $user = new User();
             $user->email = $this->userEmail;
             $user->password = $this->userPassword;
-            $user->firstName = '';
-            $user->lastName = '';
+            $user->fullName = '';
             $user->groups = [$adminGroup->id];
             $user->save();
         } catch (ExceptionAbstract $e) {
