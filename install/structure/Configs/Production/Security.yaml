@@ -14,7 +14,7 @@ Security:
         Webiny:
             RealmName: Webiny
             Anonymous: true
-            RememberMe: false
+            RememberMe: true
             Token: Webiny
             UserProviders: [UserProvider]
             AuthenticationProviders: [Form]
