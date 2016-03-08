@@ -16,12 +16,11 @@ function readModule(name, dir) {
     var config = {
         name: name,
         folders: [],
-        module: false,
-        routes: false
+        module: false
     };
 
     var systemFolders = ['Actions', 'Components', 'Views'];
-    var systemFiles = ['Routes.js', 'Module.js'];
+    var systemFiles = ['Module.js'];
 
     // Read folders
     systemFolders.map(function (folder) {
@@ -71,11 +70,6 @@ module.exports = function (gulp, opts, $) {
                     var buildPath = opts.production ? '/build/production/' : '/build/development/';
                     var asset = file.path.split(appObj.path).pop();
 
-                    var replaceBy = '/';
-                    if (appObj.version) {
-                        replaceBy = '/' + appObj.version + '/';
-                    }
-
                     var assetPath = buildPath + appObj.path + asset;
                     assets[appObj.key].assets[type].push(assetPath);
                 }
@@ -98,6 +92,45 @@ module.exports = function (gulp, opts, $) {
                 } else {
                     $.util.log("App meta saved to " + path);
                     then();
+                }
+            });
+        },
+
+        update: function (appObj) {
+            return through.obj(function (file, encoding, callback) {
+                var type = file.path.split('.').pop();
+
+                // Validate extension
+                if (['js', 'css'].indexOf(type) > -1) {
+                    // Generate asset path
+                    var buildPath = opts.production ? '/build/production/' : '/build/development/';
+                    var asset = file.path.split(appObj.path).pop();
+                    var assetPath = buildPath + appObj.path + asset;
+
+                    // Remove old file from assets
+                    var meta = assets[appObj.key];
+                    $._.each(meta.assets[type], function (existing, index) {
+                        if ($._.isEmpty(existing)) {
+                            return;
+                        }
+                        var moduleName = existing.split('/').pop().split('-').shift();
+                        if (moduleName === assetPath.split('/').pop().split('-').shift()) {
+                            meta.assets[type].splice(index, 1);
+                        }
+                    });
+
+                    // Add asset to meta
+                    meta.assets[type].push(assetPath);
+
+                    // Cleanup array of false-ish values
+                    meta.assets[type] = $._.uniq($._.compact(meta.assets[type]));
+
+                    // Write meta and continue with pipe
+                    $.webinyAssets.write(appObj, function () {
+                        callback(null, file);
+                    });
+                } else {
+                    callback(null, file);
                 }
             });
         },
@@ -178,7 +211,7 @@ module.exports = function (gulp, opts, $) {
             // Webiny is a collection of core tools and needs to be easily accessible from everywhere
             // import Webiny from 'Webiny';
             if (source === 'Webiny') {
-                return 'Core/Webiny/webiny/webiny';
+                return 'Core/Webiny/webiny/Webiny';
             }
 
             return source;

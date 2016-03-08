@@ -48,7 +48,7 @@ module.exports = function (gulp, opts, $, pipes) {
 				appObj.modules.map(function (moduleObj) {
 					$.watch(moduleObj.scripts, {read: false}, function () {
 						$.util.log('Re-building ' + moduleObj.name + ' module...');
-						return pipes.buildModuleScripts(appObj, moduleObj).pipe($.livereload());
+						return pipes.buildModuleScripts(appObj, moduleObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
 					});
 				});
 
@@ -61,7 +61,7 @@ module.exports = function (gulp, opts, $, pipes) {
 
 			$.watch(opts.config.paths.styles(appObj.sourceDir), {read: false}, function () {
 				$.util.log('Re-building ' + appObj.name + ' styles...');
-				return pipes.buildStyles(appObj).pipe($.livereload());
+				return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
 			});
 		});
 	});

@@ -46,6 +46,9 @@ module.exports = function (gulp, opts, $) {
         return $.order(config.getStyles(), {base: appObj.sourceDir + '/Assets'});
     };
 
+    /**
+     * This pipe is used only in development
+     */
     pipes.buildModuleScripts = function (appObj, moduleObj) {
         return gulp.src(moduleObj.scripts)
             .pipe($.webinyAssets.module(appObj))
@@ -54,11 +57,16 @@ module.exports = function (gulp, opts, $) {
             .pipe($.duration(moduleObj.name + ' module'))
             .pipe(pipes.babelProcess(appObj, moduleObj.name))
             .pipe($.concat(moduleObj.name + '.js'))
-            .pipe($.rev())
+            .pipe($.ifElse(opts.jsRev, function () {
+                return $.rev();
+            }))
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
     };
 
+    /**
+     * This pipe is used only in development
+     */
     pipes.buildRemainingAppScripts = function (appObj) {
         return gulp.src(opts.config.paths.scriptsDev(appObj.sourceDir))
             .pipe($.eslint(opts.config.eslint))
@@ -66,7 +74,9 @@ module.exports = function (gulp, opts, $) {
             .pipe($.duration('App scripts'))
             .pipe(pipes.babelProcess(appObj))
             .pipe($.concat('app.js'))
-            .pipe($.rev())
+            .pipe($.ifElse(opts.jsRev, function () {
+                return $.rev();
+            }))
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj));
     };
@@ -106,7 +116,6 @@ module.exports = function (gulp, opts, $) {
         var cssFilter = $.filter(['**/*.css', '**/*.less']);
         var jsFilter = $.filter('**/*.js');
         var es6Filter = $.filter('**/*.es6.js');
-        var fontFilter = $.filter(['*.eot', '*.woff', '*.svg', '*.ttf']);
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);
 
         var merge = [];
@@ -138,7 +147,9 @@ module.exports = function (gulp, opts, $) {
             .pipe($.ifElse(opts.production, function () {
                 return $.uglify({mangle: false});
             }))
-            .pipe($.rev())
+            .pipe($.ifElse(opts.production || opts.jsRev, function () {
+                return $.rev();
+            }))
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj))
             .pipe(jsFilter.restore())
@@ -152,17 +163,13 @@ module.exports = function (gulp, opts, $) {
             .pipe($.ifElse(opts.production, function () {
                 return $.minifyCss();
             }))
-            .pipe($.rev())
+            .pipe($.ifElse(opts.production || opts.cssRev, function () {
+                return $.rev();
+            }))
             .pipe($.sourcemaps.write())
             .pipe(gulp.dest(appObj.buildDir + '/css'))
             .pipe($.webinyAssets.add(appObj))
             .pipe(cssFilter.restore())
-
-            // FONTS
-            .pipe(fontFilter)
-            .pipe($.flatten())
-            .pipe(gulp.dest(appObj.buildDir + '/fonts'))
-            .pipe(fontFilter.restore())
 
             // IMAGES
             .pipe(imageFilter)
@@ -180,7 +187,9 @@ module.exports = function (gulp, opts, $) {
             .pipe($.ifElse(opts.production, function () {
                 return $.minifyCss();
             }))
-            .pipe($.rev())
+            .pipe($.ifElse(opts.production || opts.cssRev, function () {
+                return $.rev();
+            }))
             .pipe(gulp.dest(appObj.buildDir + '/css'))
             .pipe($.webinyAssets.add(appObj));
     };
@@ -188,6 +197,7 @@ module.exports = function (gulp, opts, $) {
     pipes.buildFonts = function (appObj) {
         return gulp.src(opts.config.paths.fonts(appObj.sourceDir))
             .pipe($.duration('Fonts'))
+            .pipe($.flatten())
             .pipe(gulp.dest(appObj.buildDir + '/fonts'));
     };
 

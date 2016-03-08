@@ -3,7 +3,7 @@ module.exports = function (gulp, opts, $, pipes) {
         scripts: ["**/*.{js,jsx}", "!Assets/**/*"],
         scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*"],
         styles: ["Assets/styles/**/*.{css,less}"],
-        fonts: ["Assets/fonts/**/*", "!Assets/fonts/**/*.{css,less}"],
+        fonts: ["Assets/fonts/**/*", "!Assets/fonts/**/*.{css,less}", "Assets/bower_components/**/*.{eot,svg,ttf,woff,woff2}"],
         images: ["Assets/images/**/*"]
     };
 
@@ -53,7 +53,8 @@ module.exports = function (gulp, opts, $, pipes) {
                 "radix": [2, "as-needed"],
                 "no-console": 0,
                 "eol-last": 0,
-                "dot-notation": 0
+                "dot-notation": 0,
+                "no-script-url": 0
             },
             "globals": {
                 "jQuery": false,
