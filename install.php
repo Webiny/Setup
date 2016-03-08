@@ -75,7 +75,7 @@ class Installer
 
         $this->collectData();
         $this->createFolders();
-        $this->installCoreApp();
+        //$this->installCoreApp(); // No need for this, as webiny/core is now installed through composer custom installer
         $this->createConfigs();
         $this->createHost();
         $this->autoloader->addPsr4('Apps\\Core\\', $this->absPath . 'Apps/Core');
