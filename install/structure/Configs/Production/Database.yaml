@@ -7,27 +7,10 @@ Mongo:
         Webiny:
             Class: \Webiny\Component\Mongo\Mongo
             Arguments:
-                Host: 127.0.0.1:27017
-                Database: {DATABASE_NAME}
+                Uri: 127.0.0.1:27017
+                UriOptions:
+                    database: {DATABASE_NAME}
+    Driver: \Webiny\Component\Mongo\Bridge\MongoDb
 
 Entity:
     Database: Webiny
-    Validators:
-        number: \Apps\Core\Php\DevTools\Entity\Validators\Number
-        integer: \Apps\Core\Php\DevTools\Entity\Validators\Integer
-        email: \Apps\Core\Php\DevTools\Entity\Validators\Email
-        geolocation: \Apps\Core\Php\DevTools\Entity\Validators\GeoLocation
-        minLength: \Apps\Core\Php\DevTools\Entity\Validators\MinLength
-        maxLength: \Apps\Core\Php\DevTools\Entity\Validators\MaxLength
-        gt: \Apps\Core\Php\DevTools\Entity\Validators\Gt
-        gte: \Apps\Core\Php\DevTools\Entity\Validators\Gte
-        lt: \Apps\Core\Php\DevTools\Entity\Validators\Lt
-        lte: \Apps\Core\Php\DevTools\Entity\Validators\Lte
-        unique: \Apps\Core\Php\DevTools\Entity\Validators\Unique
-        required: \Apps\Core\Php\DevTools\Entity\Validators\Required
-        in: \Apps\Core\Php\DevTools\Entity\Validators\In
-        password: \Apps\Core\Php\DevTools\Entity\Validators\Password
-        phone: \Apps\Core\Php\DevTools\Entity\Validators\Phone
-        creditCardNumber: \Apps\Core\Php\DevTools\Entity\Validators\CreditCardNumber
-        countryCode: \Apps\Core\Php\DevTools\Entity\Validators\CountryCode
-        url: \Apps\Core\Php\DevTools\Entity\Validators\Url
