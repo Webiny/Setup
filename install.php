@@ -62,6 +62,12 @@ class Installer
         ]
     ];
 
+    private $usersUserGroup = [
+        'name'        => 'Users',
+        'tag'         => 'users',
+        'permissions' => []
+    ];
+
     public function __construct($autoloader)
     {
         $this->autoloader = $autoloader;
@@ -205,13 +211,21 @@ class Installer
         // Bootstrap the system using newly generated config
         \Apps\Core\Php\Bootstrap\Bootstrap::getInstance();
 
-        // Create 'public' and 'administrators' user groups
+        // Create 'public', 'users' and 'administrators' user groups
         try {
             $publicGroup = new UserGroup();
             $publicGroup->populate($this->publicUserGroup)->save();
         } catch (ExceptionAbstract $e) {
             // Public group exists
         }
+
+        try {
+            $publicGroup = new UserGroup();
+            $publicGroup->populate($this->usersUserGroup)->save();
+        } catch (ExceptionAbstract $e) {
+            // Users group exists
+        }
+
 
         try {
             $adminGroup = new UserGroup();
