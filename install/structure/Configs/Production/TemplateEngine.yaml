@@ -4,6 +4,5 @@ TemplateEngine:
             ForceCompile: true
             CacheDir: __DIR__/../../Cache/Smarty/Cache
             CompileDir: __DIR__/../../Cache/Smarty/Compile
-            TemplateDir: __DIR__/../../Templates
             AutoEscapeOutput: false
             MergeCompiledIncludes: false

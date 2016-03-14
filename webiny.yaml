@@ -1,0 +1,13 @@
+# Example of config for automated installation
+Config:
+    Domains:
+        Development: http://whatever.app:8001
+    Database: Whatever
+    Apps:
+        Whatever: v0.1
+User:
+    Username: mail@example.com
+    Password: dev
+VirtualHost:
+    Path: /var/resources/hosts/whatever.app
+    ErrorLog: /var/log/nginx/whatever.app-error.log

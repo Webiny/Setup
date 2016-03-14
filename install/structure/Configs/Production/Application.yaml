@@ -1,6 +1,6 @@
 Application:
   Environment: production
-  AbsolutePath: {ABS_PATH}
-  WebPath: {DOMAIN}
-  ApiPath: {DOMAIN}/api
+  AbsolutePath: ''
+  WebPath: ''
+  ApiPath: ''
   Backend: admin
