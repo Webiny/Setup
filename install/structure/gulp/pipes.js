@@ -11,7 +11,10 @@ module.exports = function (gulp, opts, $) {
                     moduleIds: true,
                     compact: false,
                     plugins: [
-                        "transform-es2015-modules-systemjs"
+                        "transform-es2015-modules-systemjs",
+                        ["babel-plugin-transform-builtin-extend", {
+                            globals: ["Error"]
+                        }]
                     ],
                     presets: ["es2015", "react"],
                     getModuleId: function (moduleName) {
@@ -33,7 +36,10 @@ module.exports = function (gulp, opts, $) {
             })
             .pipe(function () {
                 return $.replace("throw new TypeError('Cannot call a class as a function')", '')
-            })();
+            })().on('error', function (e) {
+            console.error(e.message + ' on line ' + e.loc.line);
+            this.emit('end');
+        });
     };
 
     pipes.orderedVendorScripts = function (appObj) {
@@ -135,7 +141,7 @@ module.exports = function (gulp, opts, $) {
             .pipe(es6Filter)
             .pipe($.eslint(opts.config.eslint))
             .pipe($.eslint.format())
-            .pipe($.rename(function(path){
+            .pipe($.rename(function (path) {
                 path.basename = path.basename.replace('.es6', '');
             }))
             .pipe(pipes.babelProcess(appObj))
@@ -219,7 +225,7 @@ module.exports = function (gulp, opts, $) {
     pipes.buildApp = function (app, jsApp) {
         return Promise.all($.webiny.getApps(app, jsApp).map(function (appObj) {
             $.webinyAssets.app(appObj);
-            return new Promise(function(resolve, reject){
+            return new Promise(function (resolve, reject) {
                 pipes.buildJsApp(appObj).on('end', function () {
                     $.webinyAssets.write(appObj, resolve);
                 }).on('error', reject);

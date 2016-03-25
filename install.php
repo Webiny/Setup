@@ -332,6 +332,8 @@ class Installer
         $_SERVER = [];
         $_SERVER['SERVER_NAME'] = $this->config->keyNested('Config.Domains.Development');
 
+        // TODO: if nema domene pitaj input
+
         // Bootstrap the system using newly generated config
         \Apps\Core\Php\Bootstrap\Bootstrap::getInstance();
 
