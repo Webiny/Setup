@@ -43,13 +43,11 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.orderedVendorScripts = function (appObj) {
-        var config = $.webiny.readAssetsConfig(appObj);
-        return $.order(config.getVendors(), {base: appObj.sourceDir + '/Assets'});
+        return $.order(appObj.assets.getVendors(), {base: appObj.sourceDir + '/Assets'});
     };
 
     pipes.orderedStyles = function (appObj) {
-        var config = $.webiny.readAssetsConfig(appObj);
-        return $.order(config.getStyles(), {base: appObj.sourceDir + '/Assets'});
+        return $.order(appObj.assets.getStylesOrder(), {base: appObj.sourceDir + '/Assets'});
     };
 
     /**
@@ -185,10 +183,19 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.buildStyles = function (appObj) {
-        return gulp.src(opts.config.paths.styles(appObj.sourceDir))
+        return gulp.src(opts.config.paths.styles(appObj))
             .pipe($.duration('Styles'))
             .pipe(pipes.orderedStyles(appObj))
-            .pipe($.replace('../../', ''))
+            .pipe($.ifElse(appObj.assets.isLess(), function () {
+                return $.less();
+            }))
+            .pipe($.ifElse(appObj.assets.isSass(), function () {
+                return $.sass().on('error', $.sass.logError);
+            }))
+            .pipe($.replaceTask({
+                patterns: appObj.assets.getStylesReplacements(),
+                usePrefix: false
+            }))
             .pipe($.concat('styles.css'))
             .pipe($.ifElse(opts.production, function () {
                 return $.minifyCss();

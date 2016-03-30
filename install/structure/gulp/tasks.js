@@ -59,7 +59,7 @@ module.exports = function (gulp, opts, $, pipes) {
 				});
 			}
 
-			$.watch(opts.config.paths.styles(appObj.sourceDir), {read: false}, function () {
+			$.watch(opts.config.paths.watchStyles(appObj), {read: false}, function () {
 				$.util.log('Re-building ' + appObj.name + ' styles...');
 				return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
 			});

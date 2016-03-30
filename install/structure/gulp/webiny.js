@@ -1,10 +1,46 @@
 var yaml = require('js-yaml');
 var fs = require('fs');
 
-function AssetsConfig(config) {
+function AssetsConfig(config, $) {
 
     this.getStyles = function () {
-        return config.Assets && config.Assets.Styles || [];
+        if (this.isLess()) {
+            return $._.get(config, 'Assets.Styles.Less', '*.nostyle');
+        }
+
+        if (this.isSass()) {
+            return $._.get(config, 'Assets.Styles.Sass', '*.nostyle');
+        }
+
+        return 'styles/css/**/*.css';
+    };
+
+    this.getStylesOrder = function () {
+        return $._.get(config, 'Assets.Styles.Css', []);
+    };
+
+    this.getStylesReplacements = function () {
+        var replacements = $._.get(config, 'Assets.Styles.Replacements', {});
+        var patterns = [];
+        $._.each(replacements, function (replacement, match) {
+            patterns.push({
+                match: match,
+                replacement: replacement
+            });
+        });
+        return patterns;
+    };
+
+    this.isLess = function () {
+        return $._.has(config, 'Assets.Styles.Less');
+    };
+
+    this.isSass = function () {
+        return $._.has(config, 'Assets.Styles.Sass');
+    };
+
+    this.isCss = function () {
+        return $._.has(config, 'Assets.Styles.Css');
     };
 
     this.getVendors = function () {
@@ -55,6 +91,8 @@ module.exports = function (gulp, opts, $) {
                 modules: modules
             };
 
+            appMeta.assets = $.webiny.readAssetsConfig(appMeta);
+
             if (version) {
                 appMeta.version = version;
             }
@@ -99,11 +137,11 @@ module.exports = function (gulp, opts, $) {
                 try {
                     assetsConfigs[appObj.name] = yaml.safeLoad(fs.readFileSync(appObj.sourceDir + '/Assets/Assets.yaml', 'utf8'));
                 } catch (e) {
-                    return new AssetsConfig({});
+                    return new AssetsConfig({}, $);
                 }
             }
 
-            return new AssetsConfig(assetsConfigs[appObj.name]);
+            return new AssetsConfig(assetsConfigs[appObj.name], $);
         }
     };
 };

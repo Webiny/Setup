@@ -2,7 +2,6 @@ module.exports = function (gulp, opts, $, pipes) {
     var paths = {
         scripts: ["**/*.{js,jsx}", "!Assets/**/*"],
         scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*"],
-        styles: ["Assets/styles/**/*.{css,less}"],
         fonts: ["Assets/fonts/**/*", "!Assets/fonts/**/*.{css,less}", "Assets/bower_components/**/*.{eot,svg,ttf,woff,woff2}"],
         images: ["Assets/images/**/*"]
     };
@@ -27,8 +26,12 @@ module.exports = function (gulp, opts, $, pipes) {
                 return parseValues(paths.scriptsDev, sourceAppDir);
             },
 
-            styles: function (sourceAppDir) {
-                return parseValues(paths.styles, sourceAppDir);
+            styles: function (appObj) {
+                return appObj.sourceDir + '/Assets/' + appObj.assets.getStyles();
+            },
+
+            watchStyles: function (appObj) {
+                return appObj.sourceDir + '/Assets/styles/**/*.{css,less,scss}';
             },
 
             fonts: function (sourceAppDir) {
@@ -45,6 +48,7 @@ module.exports = function (gulp, opts, $, pipes) {
                 "react/react-in-jsx-scope": 0,
                 "react/sort-comp": 0,
                 "react/prop-types": 0,
+                "react/jsx-boolean-value": 0,
                 "indent": 0,
                 "comma-dangle": [2, "never"],
                 "object-curly-spacing": 0,
@@ -59,6 +63,7 @@ module.exports = function (gulp, opts, $, pipes) {
             "globals": {
                 "jQuery": false,
                 "$": false,
+                "Cookies": false,
                 "Webiny": true,
                 "WebinyBootstrap": true,
                 "React": false,
