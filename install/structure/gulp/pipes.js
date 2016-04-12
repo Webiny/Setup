@@ -56,8 +56,8 @@ module.exports = function (gulp, opts, $) {
     pipes.buildModuleScripts = function (appObj, moduleObj) {
         return gulp.src(moduleObj.scripts)
             .pipe($.webinyAssets.module(appObj))
-            .pipe($.eslint(opts.config.eslint))
-            .pipe($.eslint.format())
+            //.pipe($.eslint(opts.config.eslint))
+            //.pipe($.eslint.format())
             .pipe($.duration(moduleObj.name + ' module'))
             .pipe(pipes.babelProcess(appObj, moduleObj.name))
             .pipe($.concat(moduleObj.name + '.js'))
