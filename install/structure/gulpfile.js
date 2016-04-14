@@ -31,6 +31,7 @@ $.livereload = require('gulp-livereload');
 $.fs = require('fs');
 $.path = require('path');
 $.mainBowerFiles = require('main-bower-files');
+$.cssImport = require('gulp-cssimport');
 
 // Get CLI arguments: gulp build-app --app Backend --production
 var opts = require('yargs').argv;

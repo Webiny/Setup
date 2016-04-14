@@ -37,29 +37,31 @@ module.exports = function (gulp, opts, $, pipes) {
 
 		$.livereload.listen(35729);
 
+        var events = ['add', 'change'];
+
 		$.webiny.getApps().map(function (appObj) {
 			if (opts.production) {
-				$.watch(opts.config.paths.scripts(appObj.sourceDir), {read: false}, function () {
+				$.watch(opts.config.paths.scripts(appObj.sourceDir), {read: false, events: events}, function () {
 					$.util.log('Re-building ' + appObj.name + ' app scripts...');
 					return pipes.buildAppScripts(appObj).pipe($.livereload());
 				});
 			} else {
 				// Watch each module separately
 				appObj.modules.map(function (moduleObj) {
-					$.watch(moduleObj.scripts, {read: false}, function () {
+					$.watch(moduleObj.scripts, {read: false, events: events}, function () {
 						$.util.log('Re-building ' + moduleObj.name + ' module...');
 						return pipes.buildModuleScripts(appObj, moduleObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
 					});
 				});
 
 				// Watch remaining scripts
-				$.watch(opts.config.paths.scriptsDev(appObj.sourceDir), {read: false}, function () {
+				$.watch(opts.config.paths.scriptsDev(appObj.sourceDir), {read: false, events: events}, function () {
 					$.util.log('Re-building ' + appObj.name + ' app scripts...');
 					return pipes.buildRemainingAppScripts(appObj).pipe($.livereload());
 				});
 			}
 
-			$.watch(opts.config.paths.watchStyles(appObj), {read: false}, function () {
+			$.watch(opts.config.paths.watchStyles(appObj), {read: false, events: events}, function () {
 				$.util.log('Re-building ' + appObj.name + ' styles...');
 				return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
 			});

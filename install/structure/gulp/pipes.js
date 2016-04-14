@@ -165,7 +165,7 @@ module.exports = function (gulp, opts, $) {
             .pipe(pipes.orderedVendorScripts(appObj))
             .pipe($.concat('vendors.css'))
             .pipe($.ifElse(opts.production, function () {
-                return $.minifyCss();
+                return $.cleanCss();
             }))
             .pipe($.ifElse(opts.production || opts.cssRev, function () {
                 return $.rev();
@@ -192,13 +192,14 @@ module.exports = function (gulp, opts, $) {
             .pipe($.ifElse(appObj.assets.isSass(), function () {
                 return $.sass().on('error', $.sass.logError);
             }))
+            .pipe($.cssImport().on('error', $.util.log))
             .pipe($.replaceTask({
                 patterns: appObj.assets.getStylesReplacements(),
                 usePrefix: false
             }))
             .pipe($.concat('styles.css'))
             .pipe($.ifElse(opts.production, function () {
-                return $.minifyCss();
+                return $.cleanCss();
             }))
             .pipe($.ifElse(opts.production || opts.cssRev, function () {
                 return $.rev();
