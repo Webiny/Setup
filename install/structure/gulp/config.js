@@ -45,6 +45,7 @@ module.exports = function (gulp, opts, $, pipes) {
         eslint: {
             "extends": "airbnb",
             "rules": {
+                "react/no-multi-comp": 0,
                 "react/react-in-jsx-scope": 0,
                 "react/sort-comp": 0,
                 "react/prop-types": 0,
@@ -77,7 +78,8 @@ module.exports = function (gulp, opts, $, pipes) {
                 "moment": false,
                 "accounting": false,
                 "_apiUrl": true,
-                "isMobile": false
+                "isMobile": false,
+                "filesize": true
             }
         }
     };
