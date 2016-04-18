@@ -8,6 +8,7 @@ module.exports = function (gulp, opts, $, pipes) {
 
     var parseValues = function (values, sourceAppDir) {
         return $._.map(values, function (value) {
+            sourceAppDir = _.trimLeft(sourceAppDir, './');
             var path = sourceAppDir + "/" + value;
             if ($._.startsWith(value, "!")) {
                 path = "!" + sourceAppDir + "/" + $._.trimLeft(value, "!");
