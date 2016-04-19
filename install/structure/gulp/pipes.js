@@ -36,10 +36,21 @@ module.exports = function (gulp, opts, $) {
             })
             .pipe(function () {
                 return $.replace("throw new TypeError('Cannot call a class as a function')", '')
-            })().on('error', function (e) {
-            console.error(e.message + ' on line ' + e.loc.line);
-            this.emit('end');
-        });
+            })()
+            .on('error', function (e) {
+                var msg = e.message + ' on line ' + e.loc.line;
+                var line = Array(msg.length + 1).join('=');
+                console.log(
+                    "\n\n",
+                    $.util.colors.red(line),
+                    "\n",
+                    $.util.colors.red(msg),
+                    "\n",
+                    $.util.colors.red(line),
+                    "\n\n"
+                );
+                this.emit('end');
+            });
     };
 
     pipes.orderedVendorScripts = function (appObj) {
