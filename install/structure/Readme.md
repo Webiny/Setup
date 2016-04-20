@@ -9,4 +9,4 @@ Gulp Build
 7. `gulp build --production` builds a production version of all apps
 8. `gulp build` builds a development version of all apps
 
-Change push 1
+Change push
