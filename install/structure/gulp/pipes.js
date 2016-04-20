@@ -1,4 +1,3 @@
-// New pipes 2
 var path = require('path');
 
 module.exports = function (gulp, opts, $) {

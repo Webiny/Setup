@@ -65,5 +65,3 @@ $.webinyAssets = require('./gulp/webinyAssets.js')(gulp, opts, $);
 
 // Import tasks
 var tasks = require('./gulp/tasks')(gulp, opts, $, pipes);
-
-// Updated gulpfile
