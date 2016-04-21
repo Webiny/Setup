@@ -242,7 +242,9 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.buildApp = function (app, jsApp) {
-        return Promise.all($.webiny.getApps(app, jsApp).map(function (appObj) {
+        var apps = $.webiny.getApps(app, jsApp);
+        $.webiny.showAppsReport();
+        return Promise.all(apps.map(function (appObj) {
             $.webinyAssets.app(appObj);
             return new Promise(function (resolve, reject) {
                 pipes.buildJsApp(appObj).on('end', function () {

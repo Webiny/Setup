@@ -1,5 +1,6 @@
 var yaml = require('js-yaml');
 var fs = require('fs');
+var Table = require('cli-table');
 
 function AssetsConfig(config, $) {
 
@@ -52,10 +53,29 @@ var assetsConfigs = {};
 
 module.exports = function (gulp, opts, $) {
 
+    var cyan = $.util.colors.cyan;
+    var red = $.util.colors.red;
+
+    var appsTable = new Table({
+        head: [cyan('JS App'), cyan('Version'), cyan('Root directory'), cyan('Modules'), cyan('Notes')],
+        colWidths: [35, 10, 50, 10, 30],
+        colAligns: ['left', 'middle', 'left', 'middle']
+    });
+
+    function logInvalidApp(app, dir, note) {
+        appsTable.push([
+            red(app),
+            red('-'),
+            red(dir),
+            red('-'),
+            red(note || '')
+        ]);
+    }
+
     function getFolders(dir) {
         try {
             return $.fs.readdirSync(dir).filter(function (file) {
-                return $.fs.statSync($.path.join(dir, file)).isDirectory();
+                return $.fs.statSync($.path.join(dir, file)).isDirectory() && file !== '.git';
             });
         } catch (e) {
             return [];
@@ -66,6 +86,12 @@ module.exports = function (gulp, opts, $) {
         var jsApps = [];
         getFolders(dir).map(function (jsAppFolder) {
             if (jsApp && jsApp != jsAppFolder) {
+                return;
+            }
+
+            // Do not allow building of apps with missing App.js file
+            if (!fs.existsSync(dir + '/' + jsAppFolder + '/App.js')) {
+                logInvalidApp(app + '.' + jsAppFolder, dir + '/' + jsAppFolder, 'Missing App.js');
                 return;
             }
 
@@ -98,6 +124,14 @@ module.exports = function (gulp, opts, $) {
             }
 
             jsApps.push(appMeta);
+
+            appsTable.push([
+                appMeta.name,
+                $.util.colors.magenta(appMeta.version || '-'),
+                appMeta.sourceDir,
+                appMeta.modules.length,
+                ''
+            ]);
         });
 
         return jsApps;
@@ -111,17 +145,28 @@ module.exports = function (gulp, opts, $) {
                 return readJsApps(app, jsApp, dir);
             }
 
+
             var jsApps = [];
             getFolders(dir).map(function (app) {
                 var versionsDir = './Apps/' + app;
-                if (app === 'Core') {
+                if (fs.existsSync(versionsDir + '/App.yaml')) {
                     var dir = versionsDir + '/Js';
                     readJsApps(app, jsApp, dir, null).map(function (appObj) {
                         jsApps.push(appObj);
                     });
                 } else {
-                    getFolders(versionsDir).map(function (version) {
+                    var folders = getFolders(versionsDir);
+                    if (!folders.length) {
+                        logInvalidApp(app, versionsDir, 'Missing App.yaml');
+                    }
+                    folders.map(function (version) {
                         var dir = versionsDir + '/' + version + '/Js';
+
+                        // Do not attempt to read apps with missing App.yaml
+                        if (!fs.existsSync(versionsDir + '/' + version + '/App.yaml')) {
+                            logInvalidApp(app, versionsDir + '/' + version, 'Missing App.yaml');
+                            return;
+                        }
                         readJsApps(app, jsApp, dir, version).map(function (appObj) {
                             jsApps.push(appObj);
                         });
@@ -142,6 +187,10 @@ module.exports = function (gulp, opts, $) {
             }
 
             return new AssetsConfig(assetsConfigs[appObj.name], $);
+        },
+
+        showAppsReport: function () {
+            console.log(appsTable.toString());
         }
     };
 };
