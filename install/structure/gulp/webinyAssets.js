@@ -45,10 +45,14 @@ module.exports = function (gulp, opts, $) {
 
     return {
         app: function (appObj) {
+            var assetsPath = opts.production ? '/build/production/' : '/build/development/';
+            var appPath = appObj.version ? appObj.name.replace('.', '/' + appObj.version + '/') : appObj.name.replace('.', '/');
+
             assets[appObj.key] = {
                 name: appObj.name,
                 version: appObj.version || null,
                 assets: {
+                    path: assetsPath + appPath,
                     js: [],
                     css: []
                 },

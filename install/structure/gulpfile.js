@@ -17,6 +17,7 @@
  * --production - turn on production build: will minify CSS and uglify JS (very slow)
  * --js-rev - turn on JS revisioning (If --production, revisioning is ON by default)
  * --css-rev - turn on JS revisioning (If --production, revisioning is ON by default)
+ * --es-lint - turn ESLint on or off (ESLint is ON by default)
  */
 
 var gulp = require('gulp');
@@ -38,6 +39,10 @@ var opts = require('yargs').argv;
 
 if (!opts.app) {
     opts.app = 'Core';
+}
+
+if (!opts.esLint) {
+    opts.esLint = true;
 }
 
 // If specific JS app is requested

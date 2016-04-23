@@ -67,8 +67,12 @@ module.exports = function (gulp, opts, $) {
     pipes.buildModuleScripts = function (appObj, moduleObj) {
         return gulp.src(moduleObj.scripts)
             .pipe($.webinyAssets.module(appObj))
-            .pipe($.eslint(opts.config.eslint))
-            .pipe($.eslint.format())
+            .pipe($.ifElse(opts.esLint != 'false', function () {
+                return $.eslint(opts.config.eslint);
+            }))
+            .pipe($.ifElse(opts.esLint != 'false', function () {
+                return $.eslint.format();
+            }))
             .pipe($.duration(moduleObj.name + ' module'))
             .pipe(pipes.babelProcess(appObj, moduleObj.name))
             .pipe($.concat(moduleObj.name + '.js'))
@@ -84,8 +88,12 @@ module.exports = function (gulp, opts, $) {
      */
     pipes.buildRemainingAppScripts = function (appObj) {
         return gulp.src(opts.config.paths.scriptsDev(appObj.sourceDir))
-            .pipe($.eslint(opts.config.eslint))
-            .pipe($.eslint.format())
+            .pipe($.ifElse(opts.esLint != 'false', function () {
+                return $.eslint(opts.config.eslint);
+            }))
+            .pipe($.ifElse(opts.esLint != 'false', function () {
+                return $.eslint.format();
+            }))
             .pipe($.duration('App scripts'))
             .pipe(pipes.babelProcess(appObj))
             .pipe($.concat('app.js'))
