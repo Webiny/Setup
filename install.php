@@ -366,8 +366,9 @@ class Installer
             $user = new User();
             $user->email = $this->config->keyNested('User.Username');
             $user->password = $this->config->keyNested('User.Password');
-            $user->fullName = '';
             $user->groups = [$adminGroup->id];
+            $user->firstName = '';
+            $user->lastName = '';
             $user->save();
         } catch (ExceptionAbstract $e) {
             // User exists
