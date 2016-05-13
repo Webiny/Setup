@@ -1,3 +1,4 @@
+/* eslint-disable */
 var yaml = require('js-yaml');
 var fs = require('fs');
 var Table = require('cli-table');
@@ -124,14 +125,6 @@ module.exports = function (gulp, opts, $) {
             }
 
             jsApps.push(appMeta);
-
-            appsTable.push([
-                appMeta.name,
-                $.util.colors.magenta(appMeta.version || '-'),
-                appMeta.sourceDir,
-                appMeta.modules.length,
-                ''
-            ]);
         });
 
         return jsApps;
@@ -139,39 +132,64 @@ module.exports = function (gulp, opts, $) {
 
     return {
         getApps: function (app, jsApp) {
-            var dir = app ? './Apps/' + app + '/Js' : './Apps';
-
-            if (app) {
-                return readJsApps(app, jsApp, dir);
-            }
-
-
+            // Read all apps
+            var dir = './Apps';
             var jsApps = [];
-            getFolders(dir).map(function (app) {
-                var versionsDir = './Apps/' + app;
+            getFolders(dir).map(function (appSubfolder) {
+                // See if subfolder itself is an app (without version subfolder)
+                var versionsDir = './Apps/' + appSubfolder;
                 if (fs.existsSync(versionsDir + '/App.yaml')) {
+                    // We have an app without version
                     var dir = versionsDir + '/Js';
-                    readJsApps(app, jsApp, dir, null).map(function (appObj) {
+                    // Read JS apps from given dir
+                    readJsApps(appSubfolder, jsApp, dir, null).map(function (appObj) {
                         jsApps.push(appObj);
                     });
                 } else {
+                    // We may have a versioned app and we now need to read all version folders and make sure they are not Js or Php folders
                     var folders = getFolders(versionsDir);
-                    if (!folders.length) {
-                        logInvalidApp(app, versionsDir, 'Missing App.yaml');
+                    // If it contains Js or Php folder it means it is not a versioned app, and it's missing an App.yaml file
+                    if (!folders.length || folders.indexOf('Js') > -1 || folders.indexOf('Php') > -1) {
+                        logInvalidApp(appSubfolder, versionsDir, 'Missing App.yaml');
+                        return;
                     }
-                    folders.map(function (version) {
-                        var dir = versionsDir + '/' + version + '/Js';
 
+                    // Read JS apps from each version subfolder
+                    folders.map(function (version) {
                         // Do not attempt to read apps with missing App.yaml
                         if (!fs.existsSync(versionsDir + '/' + version + '/App.yaml')) {
-                            logInvalidApp(app, versionsDir + '/' + version, 'Missing App.yaml');
+                            logInvalidApp(appSubfolder, versionsDir + '/' + version, 'Missing App.yaml');
                             return;
                         }
-                        readJsApps(app, jsApp, dir, version).map(function (appObj) {
+
+                        var dir = versionsDir + '/' + version + '/Js';
+                        readJsApps(appSubfolder, jsApp, dir, version).map(function (appObj) {
                             jsApps.push(appObj);
                         });
                     });
                 }
+            });
+
+            // Filter apps if necessary
+            if (app) {
+                jsApps = $._.filter(jsApps, function (a) {
+                    if (app && jsApp) {
+                        return a.name === app + '.' + jsApp;
+                    }
+
+                    return $._.startsWith(a.name, app + '.');
+                });
+            }
+
+            // Add filtered apps to table
+            jsApps.map(function (a) {
+                appsTable.push([
+                    a.name,
+                    $.util.colors.magenta(a.version || '-'),
+                    a.sourceDir,
+                    a.modules.length,
+                    ''
+                ]);
             });
 
             return jsApps;

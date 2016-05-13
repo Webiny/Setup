@@ -1,3 +1,4 @@
+/* eslint-disable */
 var path = require('path');
 
 module.exports = function (gulp, opts, $) {
@@ -166,6 +167,7 @@ module.exports = function (gulp, opts, $) {
             // JS
             .pipe(jsFilter)
             .pipe(pipes.orderedVendorScripts(appObj))
+            .pipe($.print())
             .pipe($.concat('vendors.js'))
             .pipe($.ifElse(opts.production, function () {
                 return $.uglify({mangle: false});

@@ -1,17 +1,18 @@
 module.exports = function (gulp, opts, $, pipes) {
     var paths = {
-        scripts: ["**/*.{js,jsx}", "!Assets/**/*"],
-        scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*"],
+        scripts: ["**/*.{js,jsx}", "!Assets/**/*", "!Tests/**/*.js"],
+        scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*", "!Tests/**/*.js"],
+        testScripts: ["Tests/**/*.js"],
         fonts: ["Assets/fonts/**/*", "!Assets/fonts/**/*.{css,less}", "Assets/bower_components/**/*.{eot,svg,ttf,woff,woff2}"],
         images: ["Assets/images/**/*"]
     };
 
     var parseValues = function (values, sourceAppDir) {
         return $._.map(values, function (value) {
-            sourceAppDir = _.trimLeft(sourceAppDir, './');
+            sourceAppDir = _.trimStart(sourceAppDir, './');
             var path = sourceAppDir + "/" + value;
             if ($._.startsWith(value, "!")) {
-                path = "!" + sourceAppDir + "/" + $._.trimLeft(value, "!");
+                path = "!" + sourceAppDir + "/" + $._.trimStart(value, "!");
             }
             return path;
         });

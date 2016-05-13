@@ -94,6 +94,25 @@ module.exports = function (gulp, opts, $, pipes) {
         });
     });
 
+    // Run tests
+    gulp.task('run-tests', function () {
+        var apps = $.webiny.getApps();
+        return Promise.all(apps.map(function (appObj) {
+            return new Promise(function (resolve, reject) {
+                return gulp.src(appObj.sourceDir + '/Tests/**/*.js')
+                    .pipe($.mocha({
+                        reporter: 'spec',
+                        compilers: {
+                            js: $.babelRegister({
+                                "presets": ["es2015"]
+                            })
+                        },
+                        config: './mochaConfig.json'
+                    })).on('end', resolve).on('error', reject);
+            });
+        }));
+    });
+
     // default task
     gulp.task('default', ['build-all']);
 };
