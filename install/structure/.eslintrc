@@ -5,8 +5,10 @@
         "react/react-in-jsx-scope": 0,
         "react/sort-comp": 0,
         "react/prop-types": 0,
+        "react/jsx-closing-bracket-location": [2, "after-props"],
+        "react/jsx-indent-props": [2, 4],
         "react/jsx-boolean-value": 0,
-        "indent": 0,
+        "indent": [2, 4, {"SwitchCase": 1}],
         "comma-dangle": [2, "never"],
         "object-curly-spacing": 0,
         "new-cap": 0,
@@ -35,6 +37,10 @@
         "accounting": false,
         "_apiUrl": true,
         "isMobile": false,
-        "filesize": true
+        "filesize": true,
+        "c3": true,
+        "md5": true,
+        "google": true,
+        "SimpleMDE": true
     }
 }
