@@ -137,7 +137,9 @@ module.exports = function (gulp, opts, $) {
     };
 
     pipes.buildVendorScripts = function (appObj) {
-        var cssFilter = $.filter(['**/*.css', '**/*.less']);
+        var cssFilter = $.filter(['**/*.css', '**/*.less', '**/*.scss']);
+        var lessFilter = $.filter('**/*.less');
+        var scssFilter = $.filter('**/*.scss');
         var jsFilter = $.filter('**/*.js');
         var es6Filter = $.filter('**/*.es6.js');
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);
@@ -167,7 +169,6 @@ module.exports = function (gulp, opts, $) {
             // JS
             .pipe(jsFilter)
             .pipe(pipes.orderedVendorScripts(appObj))
-            .pipe($.print())
             .pipe($.concat('vendors.js'))
             .pipe($.ifElse(opts.production, function () {
                 return $.uglify({mangle: false});
@@ -179,10 +180,15 @@ module.exports = function (gulp, opts, $) {
             .pipe($.webinyAssets.add(appObj))
             .pipe(jsFilter.restore())
 
-            // CSS/LESS
-            .pipe(cssFilter)
+            // CSS/LESS/SCSS
+            .pipe(lessFilter)
             .pipe($.sourcemaps.init())
             .pipe($.less())
+            .pipe(lessFilter.restore())
+            .pipe(scssFilter)
+            .pipe($.sass().on('error', $.sass.logError))
+            .pipe(scssFilter.restore())
+            .pipe(cssFilter)
             .pipe(pipes.orderedVendorScripts(appObj))
             .pipe($.concat('vendors.css'))
             .pipe($.ifElse(opts.production, function () {
