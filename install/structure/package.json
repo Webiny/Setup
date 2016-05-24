@@ -26,7 +26,6 @@
         "gulp-ext-replace": "^0.2.0",
         "gulp-filter": "^2.0.2",
         "gulp-flatten": "0.0.4",
-        "gulp-if-else": "^1.0.3",
         "gulp-ignore": "^1.2.1",
         "gulp-less": "^3.0.3",
         "gulp-livereload": "^3.8.0",

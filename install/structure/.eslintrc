@@ -41,6 +41,7 @@
         "c3": true,
         "md5": true,
         "google": true,
-        "SimpleMDE": true
+        "SimpleMDE": true,
+        "CodeMirror": true
     }
 }

@@ -72,25 +72,27 @@ module.exports = function (gulp, opts, $, pipes) {
     gulp.task('watch', ['build'], function () {
         $.livereload.listen(35729);
         var events = ['add', 'change'];
-        var appObj = $.webiny.getApps(opts.app, opts.jsApp)[0];
+        var appObjs = $.webiny.getApps(opts.app, opts.jsApp);
 
-        // Watch each module separately
-        appObj.modules.map(function (moduleObj) {
-            $.watch(moduleObj.scripts, {read: false, events: events}, function () {
-                $.util.log('Re-building ' + moduleObj.name + ' module...');
-                return pipes.buildModuleScripts(appObj, moduleObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
+        appObjs.map(function (appObj) {
+            // Watch each module separately
+            appObj.modules.map(function (moduleObj) {
+                $.watch(moduleObj.scripts, {read: false, events: events}, function () {
+                    $.util.log('Re-building ' + moduleObj.name + ' module...');
+                    return pipes.buildModuleScripts(appObj, moduleObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
+                });
             });
-        });
 
-        // Watch remaining scripts
-        $.watch(opts.config.paths.scriptsDev(appObj.sourceDir), {read: false, events: events}, function () {
-            $.util.log('Re-building ' + appObj.name + ' app scripts...');
-            return pipes.buildRemainingAppScripts(appObj).pipe($.livereload());
-        });
+            // Watch remaining scripts
+            $.watch(opts.config.paths.scriptsDev(appObj.sourceDir), {read: false, events: events}, function () {
+                $.util.log('Re-building ' + appObj.name + ' app scripts...');
+                return pipes.buildRemainingAppScripts(appObj).pipe($.livereload());
+            });
 
-        $.watch(opts.config.paths.watchStyles(appObj), {read: false, events: events}, function () {
-            $.util.log('Re-building ' + appObj.name + ' styles...');
-            return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
+            $.watch(opts.config.paths.watchStyles(appObj), {read: false, events: events}, function () {
+                $.util.log('Re-building ' + appObj.name + ' styles...');
+                return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
+            });
         });
     });
 

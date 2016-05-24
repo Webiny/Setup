@@ -1,4 +1,4 @@
-module.exports = function (gulp, opts, $, pipes) {
+module.exports = function (gulp, opts, $) {
     var paths = {
         scripts: ["**/*.{js,jsx}", "!Assets/**/*", "!Tests/**/*.js"],
         scriptsDev: ["**/*.{js,jsx}", "!Modules/**/*.{js,jsx}", "!Assets/**/*", "!Tests/**/*.js"],

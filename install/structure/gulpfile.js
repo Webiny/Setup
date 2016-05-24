@@ -19,7 +19,7 @@
  * --css-rev - turn on JS revisioning (If --production, revisioning is ON by default)
  * --es-lint - turn ESLint on or off (ESLint is ON by default)
  */
-
+require('events').EventEmitter.prototype._maxListeners = 100;
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 $.chalk = require('chalk');
@@ -60,14 +60,14 @@ if (!opts.production) {
 }
 
 // Import pipes
-var pipes = require('./gulp/pipes')(gulp, opts, $);
 
 // Import config
-opts.config = require('./gulp/config.js')(gulp, opts, $, pipes);
+opts.config = require('./gulp/config.js')(gulp, opts, $);
 
 // Import webiny tools
 $.webiny = require('./gulp/webiny.js')(gulp, opts, $);
 $.webinyAssets = require('./gulp/webinyAssets.js')(gulp, opts, $);
 
 // Import tasks
+var pipes = require('./gulp/pipes')(gulp, opts, $);
 var tasks = require('./gulp/tasks')(gulp, opts, $, pipes);
