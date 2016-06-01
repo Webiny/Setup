@@ -175,7 +175,7 @@ module.exports = function (gulp, opts, $) {
             }
 
             // All other files should just be prefixed with app name, ex: Cms/Backend/{moduleName}
-            return appPrefix + moduleName;
+            return (appPrefix + moduleName).replace('//', '/');
         },
 
         /**
@@ -194,9 +194,7 @@ module.exports = function (gulp, opts, $) {
 
                 var delim = '';
 
-                // If app key consists of 2 parts - it's a Core app and it does not have a version in its path
-                // Otherwise - it's an app with version number in its path
-
+                // If app key consists of 2 parts it means there is no app version in its path
                 if (parts.length === 2) {
                     // part[0] = App name
                     // part[1] = JS app name
@@ -209,7 +207,7 @@ module.exports = function (gulp, opts, $) {
                 }
 
                 var dir = path.dirname(filename.split(delim).pop());
-                return appPrefix + dir + source.replace('./', '/');
+                return (appPrefix + dir + source.replace('./', '/')).replace('//', '/');
             }
 
             // Webiny is a collection of core tools and needs to be easily accessible from everywhere
