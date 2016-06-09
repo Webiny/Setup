@@ -24,12 +24,19 @@ module.exports = function (gulp, opts, $, pipes) {
 
     // cleans and builds a single app
     gulp.task('build', ['clean'], function () {
-        return pipes.buildApp(opts.app, opts.jsApp);
+        $.webiny.showAppsReport();
+        return Promise.all(opts.apps.map(function(app){
+            return pipes.buildApp(app);
+        }));
+
     });
 
     // cleans and builds all apps
     gulp.task('build-all', ['clean-all'], function () {
-        return pipes.buildApp();
+        $.webiny.showAppsReport();
+        return Promise.all(opts.apps.map(function(app){
+            return pipes.buildApp(app);
+        }));
     });
 
     // watch live changes
@@ -39,7 +46,7 @@ module.exports = function (gulp, opts, $, pipes) {
 
         var events = ['add', 'change'];
 
-        $.webiny.getApps().map(function (appObj) {
+        opts.apps.map(function (appObj) {
             if (opts.production) {
                 $.watch(opts.config.paths.scripts(appObj.sourceDir), {read: false, events: events}, function () {
                     $.util.log('Re-building ' + appObj.name + ' app scripts...');
@@ -72,9 +79,7 @@ module.exports = function (gulp, opts, $, pipes) {
     gulp.task('watch', ['build'], function () {
         $.livereload.listen(35729);
         var events = ['add', 'change'];
-        var appObjs = $.webiny.getApps(opts.app, opts.jsApp);
-
-        appObjs.map(function (appObj) {
+        opts.apps.map(function (appObj) {
             // Watch each module separately
             appObj.modules.map(function (moduleObj) {
                 $.watch(moduleObj.scripts, {read: false, events: events}, function () {

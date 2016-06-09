@@ -250,17 +250,13 @@ module.exports = function (gulp, opts, $) {
         ]);
     };
 
-    pipes.buildApp = function (app, jsApp) {
-        var apps = $.webiny.getApps(app, jsApp);
-        $.webiny.showAppsReport();
-        return Promise.all(apps.map(function (appObj) {
-            $.webinyAssets.app(appObj);
-            return new Promise(function (resolve, reject) {
-                pipes.buildJsApp(appObj).on('end', function () {
-                    $.webinyAssets.write(appObj, resolve);
-                }).on('error', reject);
-            });
-        }));
+    pipes.buildApp = function (appObj) {
+        $.webinyAssets.app(appObj);
+        return new Promise(function (resolve, reject) {
+            pipes.buildJsApp(appObj).on('end', function () {
+                $.webinyAssets.write(appObj, resolve);
+            }).on('error', reject);
+        });
     };
 
     return pipes;

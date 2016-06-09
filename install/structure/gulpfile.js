@@ -38,19 +38,8 @@ $.babelRegister = require('babel-register');
 // Get CLI arguments: gulp build-app --app Backend --production
 var opts = require('yargs').argv;
 
-if (!opts.app) {
-    opts.app = 'Core';
-}
-
 if (!opts.esLint) {
     opts.esLint = true;
-}
-
-// If specific JS app is requested
-if (opts.app.indexOf('.') > -1) {
-    var parts = opts.app.split('.');
-    opts.app = parts[0];
-    opts.jsApp = parts[1];
 }
 
 opts.buildDir = './public_html/build/production/';
@@ -59,8 +48,6 @@ if (!opts.production) {
     opts.buildDir = './public_html/build/development/';
 }
 
-// Import pipes
-
 // Import config
 opts.config = require('./gulp/config.js')(gulp, opts, $);
 
@@ -68,6 +55,23 @@ opts.config = require('./gulp/config.js')(gulp, opts, $);
 $.webiny = require('./gulp/webiny.js')(gulp, opts, $);
 $.webinyAssets = require('./gulp/webinyAssets.js')(gulp, opts, $);
 
-// Import tasks
+// Load app objects
+opts.apps = [];
+if ($._.isString(opts.app)) {
+    var parts = opts.app.split('.');
+    opts.apps = $.webiny.getApps(parts[0], parts[1] || null);
+} else if ($._.isArray(opts.app)) {
+    opts.app.map(function (app) {
+        var parts = app.split('.');
+        $.webiny.getApps(parts[0], parts[1] || null).map(function (a) {
+            opts.apps.push(a);
+        });
+    });
+}
+
+if (opts.apps.length == 0) {
+    opts.apps = $.webiny.getApps();
+}
+
 var pipes = require('./gulp/pipes')(gulp, opts, $);
 var tasks = require('./gulp/tasks')(gulp, opts, $, pipes);
