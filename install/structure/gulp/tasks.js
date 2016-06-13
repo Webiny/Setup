@@ -28,7 +28,7 @@ module.exports = function (gulp, opts, $, pipes) {
                 return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
             }
 
-            if ($._.includes(file.path, '/bower_components/')) {
+            if ($._.endsWith(file.path, '/bower.json')) {
                 return pipes.buildVendorScripts(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
             }
 

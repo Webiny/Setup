@@ -38,7 +38,11 @@ module.exports = function (gulp, opts, $) {
 
             watchAssets: function (appObj) {
                 return [
-                    appObj.sourceDir + '/Assets/**/*'
+                    this.styles(appObj),
+                    this.fonts(appObj.sourceDir),
+                    this.images(appObj.sourceDir),
+                    appObj.sourceDir + '/Assets/Assets.yaml',
+                    appObj.sourceDir + '/Assets/bower_components/bower.json'
                 ];
             },
 
