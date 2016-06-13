@@ -4,7 +4,6 @@ var fs = require('fs');
 var Table = require('cli-table');
 
 function AssetsConfig(config, $) {
-
     this.getStyles = function () {
         if (this.isLess()) {
             return $._.get(config, 'Assets.Styles.Less', '*.nostyle');
@@ -119,6 +118,9 @@ module.exports = function (gulp, opts, $) {
             };
 
             appMeta.assets = $.webiny.readAssetsConfig(appMeta);
+            appMeta.reloadAssetsConfig = function () {
+                appMeta.assets = $.webiny.readAssetsConfig(appMeta, true);
+            };
 
             if (version) {
                 appMeta.version = version;
@@ -195,8 +197,8 @@ module.exports = function (gulp, opts, $) {
             return jsApps;
         },
 
-        readAssetsConfig: function (appObj) {
-            if (!assetsConfigs[appObj.name]) {
+        readAssetsConfig: function (appObj, force) {
+            if (!assetsConfigs[appObj.name] || force) {
                 try {
                     assetsConfigs[appObj.name] = yaml.safeLoad(fs.readFileSync(appObj.sourceDir + '/Assets/Assets.yaml', 'utf8'));
                 } catch (e) {

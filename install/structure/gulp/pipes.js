@@ -237,16 +237,23 @@ module.exports = function (gulp, opts, $) {
 
     pipes.buildImages = function (appObj) {
         return gulp.src(opts.config.paths.images(appObj.sourceDir))
+            .pipe($.duration('Images'))
             .pipe(gulp.dest(appObj.buildDir + '/images/'));
+    };
+
+    pipes.buildAssets = function (appObj) {
+        return $.es.concat.apply(null, [
+            pipes.buildFonts(appObj),
+            pipes.buildImages(appObj),
+            pipes.buildStyles(appObj)
+        ]);
     };
 
     pipes.buildJsApp = function (appObj) {
         return $.es.concat.apply(null, [
             pipes.buildVendorScripts(appObj),
             pipes.buildAppScripts(appObj),
-            pipes.buildStyles(appObj),
-            pipes.buildFonts(appObj),
-            pipes.buildImages(appObj)
+            pipes.buildAssets(appObj)
         ]);
     };
 
