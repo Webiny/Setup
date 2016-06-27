@@ -32,15 +32,11 @@ module.exports = function (gulp, opts, $) {
                 return appObj.sourceDir + '/Assets/' + appObj.assets.getStyles();
             },
 
-            watchStyles: function (appObj) {
-                return appObj.sourceDir + '/Assets/styles/**/*.{css,less,scss}';
-            },
-
             watchAssets: function (appObj) {
                 return [
-                    this.styles(appObj),
                     this.fonts(appObj.sourceDir),
                     this.images(appObj.sourceDir),
+                    appObj.sourceDir + '/Assets/styles/**/*.{css,less,scss}',
                     appObj.sourceDir + '/Assets/Assets.yaml',
                     appObj.sourceDir + '/Assets/bower_components/bower.json'
                 ];
