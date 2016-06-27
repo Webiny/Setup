@@ -280,7 +280,7 @@ class Installer
         // Database.yaml
         $configPath = $this->absPath . 'Configs/Production/Database.yaml';
         $config = $this->config()->yaml($configPath);
-        $config->set('Mongo.Services.Webiny.Arguments.UriOptions.database', $this->config->keyNested('Config.Database'));
+        $config->set('Mongo.Services.Webiny.Calls.0.1', [$this->config->keyNested('Config.Database')]);
         file_put_contents($configPath, $config->getAsYaml());
 
         // ConfigSets.yaml

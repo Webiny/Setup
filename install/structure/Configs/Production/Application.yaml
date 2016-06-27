@@ -4,3 +4,4 @@ Application:
   WebPath: ''
   ApiPath: ''
   Backend: admin
+  ApiTokenControl: true
