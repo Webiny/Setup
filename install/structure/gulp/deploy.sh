@@ -20,6 +20,8 @@ ssh -T $host <<-ENDSSH
     echo "Activating new release..."
     unlink $rootFolder
     ln -s releases/$releaseFolder $rootFolder
+    ln -s ~/www/files/$rootFolder/Uploads $rootFolder/public_html/uploads
+    ln -s ~/www/files/$rootFolder/Temp $rootFolder/Temp
     sudo /usr/sbin/service php7.0-fpm restart
     echo "Done!"
 ENDSSH

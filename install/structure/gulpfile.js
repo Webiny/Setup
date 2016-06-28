@@ -9,8 +9,20 @@
  * In production, everything is concatenated into app.js and vendors.js (with revision hash).
  * You can not disable revisioning in production builds.
  *
+ * TASKS:
+ * - watch
+ * - watch-all
+ * - build
+ * - build-all
+ *
+ * - release
+ * Eg: gulp release --production --host username@yourdomain.com --folder development
+ * --production tells the release task to bundle 'production' JS build folder (default: development)
+ * --folder is a simple folder name (not a full path) which tells what folder inside ~/www on the server
+ * should be used as a vhost root folder. This folder is also used in ~/www/files to symlink uploads between releases
+ *
  * OPTIONS:
- * --app - specify an app to watch:
+ * --app - specify an app(s) to watch:
  *          ex1: --app Core
  *          ex2: --app Core.Webiny
  *
@@ -34,6 +46,7 @@ $.path = require('path');
 $.mainBowerFiles = require('main-bower-files');
 $.cssImport = require('gulp-cssimport');
 $.babelRegister = require('babel-register');
+$.moment = require('moment');
 
 // Get CLI arguments: gulp build-app --app Backend --production
 var opts = require('yargs').argv;

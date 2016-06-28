@@ -94,6 +94,37 @@ module.exports = function (gulp, opts, $, pipes) {
         opts.apps.map(watchApp);
     });
 
+    gulp.task('release', function () {
+        var env = opts.production ? 'production' : 'development';
+        var folder = opts.folder ? opts.folder : 'development';
+        var paths = [
+            'Apps/**/*',
+            '!Apps/**/Js/**/*',
+            '!Apps/**/*.git',
+            'Configs/**/*.yaml',
+            'public_html/build/' + env + '/**/*',
+            'public_html/index.{php,html}',
+            'vendor/**/*.{php,crt}',
+            '!vendor/**/[tT]est*/**/*',
+            '!vendor/**/*.git'
+        ];
+
+        var zipName = env + '-' + $.moment().format('YYYYMMDD-HHmmss');
+        var shell = opts.host ? $.shell([
+            'bash gulp/deploy.sh <%= file.path %> ' + opts.host + ' ' + folder,
+            'rm <%= file.path %>'
+        ]) : $.util.noop();
+
+        return gulp.src(paths, {base: '.'})
+            .pipe($.count('## files added to archive'))
+            .pipe($.zip(zipName + '.zip'))
+            .pipe(gulp.dest('releases'))
+            .pipe($.print(function (filepath) {
+                return 'Created release archive: ' + filepath;
+            }))
+            .pipe(shell)
+    });
+
     // Run tests
     gulp.task('run-tests', function () {
         var apps = $.webiny.getApps();
