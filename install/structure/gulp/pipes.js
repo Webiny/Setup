@@ -37,6 +37,7 @@ module.exports = function (gulp, opts, $) {
             if (opts.production) {
                 var replace = {
                     '/bower_components/react/react.js': '/bower_components/react/react.min.js',
+                    '/bower_components/react/react-with-addons.js': '/bower_components/react/react-with-addons.min.js',
                     '/bower_components/react/react-dom.js': '/bower_components/react/react-dom.min.js',
                     '/bower_components/react/react-dom-server.js': '/bower_components/react/react-dom-server.min.js'
                 };
