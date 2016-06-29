@@ -177,7 +177,13 @@ module.exports = function (gulp, opts, $) {
         var nonMinified = $.filter(['**/*.js', '!**/*.min.js']);
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);
 
-        var merge = [gulp.src(getBowerFiles(appObj))];
+        var merge = [];
+        try {
+            var bowerPipe = gulp.src(getBowerFiles(appObj));
+            merge.push(bowerPipe);
+        } catch (e) {
+            // Catch if bower.json does not exist
+        }
 
         var customPipe = gulp.src(appObj.sourceDir + '/Assets/custom_components/**/*.js');
         merge.push(customPipe);
