@@ -15,7 +15,7 @@ module.exports = function (gulp, opts, $) {
         return opts.production || opts.cssRev ? $.rev() : $.util.noop();
     };
     var uglify = function () {
-        return opts.production ? $.uglify({mangle: true}) : $.util.noop();
+        return opts.production ? $.uglify({mangle: false}) : $.util.noop();
     };
     var cleanCss = function () {
         return opts.production ? $.cleanCss() : $.util.noop();
