@@ -15,7 +15,7 @@ module.exports = function (gulp, opts, $) {
         return opts.production || opts.cssRev ? $.rev() : $.util.noop();
     };
     var uglify = function () {
-        return opts.production ? $.uglify({mangle: false}) : $.util.noop();
+        return opts.production ? $.uglify({mangle: true}) : $.util.noop();
     };
     var cleanCss = function () {
         return opts.production ? $.cleanCss() : $.util.noop();
@@ -25,6 +25,29 @@ module.exports = function (gulp, opts, $) {
     };
     var sass = function (appObj) {
         return appObj.assets.isSass() ? $.sass().on('error', $.sass.logError) : $.util.noop();
+    };
+
+    /**
+     * In production we use a production build of React
+     * @param appObj
+     * @returns {Array|*}
+     */
+    var getBowerFiles = function (appObj) {
+        return $.mainBowerFiles({paths: appObj.sourceDir + '/Assets'}).map(function (file) {
+            if (opts.production) {
+                var replace = {
+                    '/bower_components/react/react.js': '/bower_components/react/react.min.js',
+                    '/bower_components/react/react-dom.js': '/bower_components/react/react-dom.min.js',
+                    '/bower_components/react/react-dom-server.js': '/bower_components/react/react-dom-server.min.js'
+                };
+                $._.each(replace, function (replace, search) {
+                    if (file.endsWith(search)) {
+                        file = file.replace(search, replace);
+                    }
+                });
+            }
+            return file;
+        });
     };
 
     var pipes = {};
@@ -151,15 +174,10 @@ module.exports = function (gulp, opts, $) {
         var scssFilter = $.filter('**/*.scss');
         var jsFilter = $.filter('**/*.js');
         var es6Filter = $.filter('**/*.es6.js');
+        var nonMinified = $.filter(['**/*.js', '!**/*.min.js']);
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);
 
-        var merge = [];
-        try {
-            var bowerPipe = gulp.src($.mainBowerFiles({paths: appObj.sourceDir + '/Assets'}));
-            merge.push(bowerPipe);
-        } catch (e) {
-            // Do nothing
-        }
+        var merge = [gulp.src(getBowerFiles(appObj))];
 
         var customPipe = gulp.src(appObj.sourceDir + '/Assets/custom_components/**/*.js');
         merge.push(customPipe);
@@ -176,10 +194,12 @@ module.exports = function (gulp, opts, $) {
             .pipe(pipes.babelProcess(appObj))
             .pipe(es6Filter.restore())
             // JS
+            .pipe(nonMinified)
+            .pipe(uglify())
+            .pipe(nonMinified.restore())
             .pipe(jsFilter)
             .pipe(pipes.orderedVendorScripts(appObj))
             .pipe($.concat('vendors.js'))
-            .pipe(uglify())
             .pipe(jsRev())
             .pipe(gulp.dest(appObj.buildDir + '/scripts'))
             .pipe($.webinyAssets.add(appObj))
