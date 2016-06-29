@@ -15,11 +15,15 @@
  * - build
  * - build-all
  *
- * - release
+ * - release - Deploy and activate a new release
  * Eg: gulp release --production --host username@yourdomain.com --folder development
  * --production tells the release task to bundle 'production' JS build folder (default: development)
  * --folder is a simple folder name (not a full path) which tells what folder inside ~/www on the server
  * should be used as a vhost root folder. This folder is also used in ~/www/files to symlink uploads between releases
+ *
+ * --revert - Revert server to previous release
+ * Eg: gulp revert --host porthop@getporthop.com --folder development
+ *
  *
  * OPTIONS:
  * --app - specify an app(s) to watch:

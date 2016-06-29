@@ -125,6 +125,10 @@ module.exports = function (gulp, opts, $, pipes) {
             .pipe(shell)
     });
 
+    gulp.task('revert', $.shell.task([
+        'bash gulp/revert.sh ' + opts.host + ' ' + (opts.folder ? opts.folder : 'development')
+    ]));
+
     // Run tests
     gulp.task('run-tests', function () {
         var apps = $.webiny.getApps();
