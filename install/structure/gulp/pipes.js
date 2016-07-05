@@ -174,6 +174,7 @@ module.exports = function (gulp, opts, $) {
         var lessFilter = $.filter('**/*.less');
         var scssFilter = $.filter('**/*.scss');
         var jsFilter = $.filter('**/*.js');
+        var systemPolyfills = $.filter('**/system-polyfills.js');
         var es6Filter = $.filter('**/*.es6.js');
         var nonMinified = $.filter(['**/*.js', '!**/*.min.js']);
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);
@@ -186,9 +187,13 @@ module.exports = function (gulp, opts, $) {
             // Catch if bower.json does not exist
         }
 
-        var customPipe = gulp.src(appObj.sourceDir + '/Assets/custom_components/**/*.js');
+        var customPipe = gulp.src([appObj.sourceDir + '/Assets/custom_components/**/*.js', '!**/system-polyfills.js']);
         merge.push(customPipe);
 
+        // Copy system-polyfills - it will be required on-demand by old browsers and Google bot
+        gulp.src(appObj.sourceDir + '/Assets/custom_components/system-polyfills.js').pipe(gulp.dest(appObj.buildDir + '/scripts'));
+
+        // Process assets
         return $.es.merge(merge)
             .pipe($.duration('Vendor scripts'))
             // ES6
