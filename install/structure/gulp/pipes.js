@@ -174,7 +174,6 @@ module.exports = function (gulp, opts, $) {
         var lessFilter = $.filter('**/*.less');
         var scssFilter = $.filter('**/*.scss');
         var jsFilter = $.filter('**/*.js');
-        var systemPolyfills = $.filter('**/system-polyfills.js');
         var es6Filter = $.filter('**/*.es6.js');
         var nonMinified = $.filter(['**/*.js', '!**/*.min.js']);
         var imageFilter = $.filter(['*.gif', '*.png', '*.svg', '*.jpg', '*.jpeg']);

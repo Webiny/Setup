@@ -104,7 +104,7 @@ module.exports = function (gulp, opts, $, pipes) {
             'Configs/**/*.yaml',
             'public_html/build/' + env + '/**/*',
             'public_html/index.{php,html}',
-            'vendor/**/*.{php,crt}',
+            'vendor/**/*.{php,crt,pem}',
             '!vendor/**/[tT]est*/**/*',
             '!vendor/**/*.git'
         ];
