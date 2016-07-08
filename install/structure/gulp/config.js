@@ -38,7 +38,8 @@ module.exports = function (gulp, opts, $) {
                     this.images(appObj.sourceDir),
                     appObj.sourceDir + '/Assets/styles/**/*.{css,less,scss}',
                     appObj.sourceDir + '/Assets/Assets.yaml',
-                    appObj.sourceDir + '/Assets/bower_components/bower.json'
+                    appObj.sourceDir + '/Assets/bower_components/bower.json',
+                    appObj.sourceDir + '/Assets/custom_components/**/*'
                 ];
             },
 

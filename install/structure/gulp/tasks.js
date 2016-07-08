@@ -28,7 +28,7 @@ module.exports = function (gulp, opts, $, pipes) {
                 return pipes.buildStyles(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
             }
 
-            if ($._.endsWith(file.path, '/bower.json')) {
+            if ($._.endsWith(file.path, '/bower.json') || $._.endsWith(file.path, '.js')) {
                 return pipes.buildVendorScripts(appObj).pipe($.webinyAssets.update(appObj)).pipe($.livereload());
             }
 
@@ -104,7 +104,7 @@ module.exports = function (gulp, opts, $, pipes) {
             'Configs/**/*.yaml',
             'public_html/build/' + env + '/**/*',
             'public_html/index.{php,html}',
-            'vendor/**/*.{php,crt,pem}',
+            'vendor/**/*.{php,crt}',
             '!vendor/**/[tT]est*/**/*',
             '!vendor/**/*.git'
         ];
