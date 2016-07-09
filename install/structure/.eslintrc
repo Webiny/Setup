@@ -5,21 +5,42 @@
         "react/react-in-jsx-scope": 0,
         "react/sort-comp": 0,
         "react/prop-types": 0,
-        "react/jsx-closing-bracket-location": [2, "after-props"],
-        "react/jsx-indent-props": [2, 4],
+        "react/jsx-closing-bracket-location": [
+            2,
+            "after-props"
+        ],
+        "react/jsx-indent-props": [
+            2,
+            4
+        ],
         "react/jsx-boolean-value": 0,
-        "indent": [2, 4, {"SwitchCase": 1}],
-        "comma-dangle": [2, "never"],
+        "indent": [
+            2,
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "comma-dangle": [
+            2,
+            "never"
+        ],
         "object-curly-spacing": 0,
         "new-cap": 0,
         "no-param-reassign": 0,
-        "radix": [2, "as-needed"],
+        "radix": [
+            2,
+            "as-needed"
+        ],
         "no-console": 0,
         "eol-last": 0,
         "dot-notation": 0,
         "no-script-url": 0
     },
     "globals": {
+        "webinyApiUrl": true,
+        "webinyConfig": true,
+        "webinyEnvironment": true,
         "jQuery": false,
         "$": false,
         "Cookies": false,
@@ -35,13 +56,13 @@
         "axios": false,
         "moment": false,
         "accounting": false,
-        "_apiUrl": true,
         "isMobile": false,
         "filesize": true,
         "c3": true,
         "md5": true,
         "google": true,
         "SimpleMDE": true,
-        "CodeMirror": true
+        "CodeMirror": true,
+        "dynamics": true
     }
 }
