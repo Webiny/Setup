@@ -38,6 +38,9 @@ ssh -T $host <<-ENDSSH
     ln -s ~/www/files/$rootFolder/Temp $rootFolder/Temp
     echo $releaseFolder > releases/active-$rootFolder.txt
     sudo /usr/sbin/service php7.0-fpm restart
-    php $rootFolder/vendor/webiny/setup/release.php $domain
+
+    # Enter root project folder and run release script
+    cd $rootFolder
+    php vendor/webiny/setup/release.php $domain
     printf "\n${GREEN}INFO${NC}: We are done! Refresh your browser :)\n"
 ENDSSH
