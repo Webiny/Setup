@@ -9,6 +9,11 @@ rootFolder=$3
 # Folder containing all releases
 path='~/www/releases'
 
+#Extract domain
+IFS='@' read -ra parts <<< "$host"
+domain="${parts[1]}"
+
+# Define colors
 PURPLE='\033[0;35m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
@@ -33,5 +38,6 @@ ssh -T $host <<-ENDSSH
     ln -s ~/www/files/$rootFolder/Temp $rootFolder/Temp
     echo $releaseFolder > releases/active-$rootFolder.txt
     sudo /usr/sbin/service php7.0-fpm restart
+    php $rootFolder/vendor/webiny/setup/release.php $domain
     printf "\n${GREEN}INFO${NC}: We are done! Refresh your browser :)\n"
 ENDSSH

@@ -32,6 +32,10 @@ module.exports = function (gulp, opts, $) {
                 return appObj.sourceDir + '/Assets/' + appObj.assets.getStyles();
             },
 
+            other: function (appObj) {
+                return appObj.sourceDir + '/Assets/other/**/*';
+            },
+
             watchAssets: function (appObj) {
                 return [
                     this.fonts(appObj.sourceDir),

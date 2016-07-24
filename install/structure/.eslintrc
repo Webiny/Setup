@@ -38,14 +38,15 @@
         "no-script-url": 0
     },
     "globals": {
-        "webinyApiUrl": true,
-        "webinyConfig": true,
-        "webinyEnvironment": true,
+        "webinyWebPath": false,
+        "webinyApiPath": false,
+        "webinyConfig": false,
+        "webinyEnvironment": false,
         "jQuery": false,
         "$": false,
         "Cookies": false,
-        "Webiny": true,
-        "WebinyBootstrap": true,
+        "Webiny": false,
+        "WebinyBootstrap": false,
         "React": false,
         "ReactDOM": false,
         "ReactDOMServer": false,
@@ -58,11 +59,12 @@
         "accounting": false,
         "isMobile": false,
         "filesize": true,
-        "c3": true,
+        "c3": false,
         "md5": true,
         "google": true,
-        "SimpleMDE": true,
-        "CodeMirror": true,
-        "dynamics": true
+        "SimpleMDE": false,
+        "CodeMirror": false,
+        "dynamics": false,
+        "ZeroClipboard": false
     }
 }
