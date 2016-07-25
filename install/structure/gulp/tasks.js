@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = function (gulp, opts, $, pipes) {
     var events = ['add', 'change', 'unlink'];
 
@@ -67,7 +68,7 @@ module.exports = function (gulp, opts, $, pipes) {
 
     // cleans and builds a single app
     gulp.task('build', ['clean'], function () {
-        $.webiny.showAppsReport();
+        $.webiny.showAppsReport(opts.apps);
         return Promise.all(opts.apps.map(function (app) {
             return pipes.buildApp(app);
         }));
@@ -76,7 +77,7 @@ module.exports = function (gulp, opts, $, pipes) {
 
     // cleans and builds all apps
     gulp.task('build-all', ['clean-all'], function () {
-        $.webiny.showAppsReport();
+        $.webiny.showAppsReport(opts.apps);
         return Promise.all(opts.apps.map(function (app) {
             return pipes.buildApp(app);
         }));
@@ -122,7 +123,7 @@ module.exports = function (gulp, opts, $, pipes) {
             .pipe($.print(function (filepath) {
                 return 'Created release archive: ' + filepath;
             }))
-            .pipe(shell)
+            .pipe(shell);
     });
 
     gulp.task('revert', $.shell.task([
@@ -131,24 +132,76 @@ module.exports = function (gulp, opts, $, pipes) {
 
     // Run tests
     gulp.task('run-tests', function () {
-        var apps = $.webiny.getApps();
-        return Promise.all(apps.map(function (appObj) {
+        return Promise.all(opts.apps.map(function (appObj) {
             return new Promise(function (resolve, reject) {
-                return gulp.src(appObj.sourceDir + '/Tests/**/*.js')
-                    .pipe($.mocha({
-                        reporter: 'spec',
-                        compilers: {
-                            js: $.babelRegister({
-                                "presets": ["es2015"]
-                            })
-                        },
-                        config: './mochaConfig.json'
-                    })).on('end', resolve).on('error', reject);
+                $.glob(appObj.sourceDir + '/Tests/*.js', function (er, files) {
+                    if (files.length < 1) {
+                        return reject();
+                    }
+
+                    return gulp.src(files)
+                        .pipe($.count('Running ## test(s) for ' + $.util.colors.magenta(appObj.name)))
+                        .pipe($.mocha({
+                            reporter: 'spec',
+                            compilers: {
+                                js: $.babelRegister({
+                                    "presets": ["es2015"],
+                                    resolveModuleSource: function (source) {
+                                        if (source === 'Webiny/TestSuite') {
+                                            return process.env.PWD + '/Apps/Core/Js/Webiny/Modules/Core/TestLib/TestSuite';
+                                        }
+                                        return source;
+                                    }
+                                })
+                            }
+                        }))
+                        .on('end', resolve).on('error', reject);
+                });
             });
         }));
     });
 
     // default task
-    gulp.task('default', ['build-all']);
+    gulp.task('default', function (done) {
+        var choices = [
+            {name: 'All', value: 'all'},
+            new $.inquirer.Separator()
+        ];
+        var apps = $.webiny.getApps();
+        apps.map(function (app) {
+            choices.push({
+                name: app.name,
+                value: app
+            });
+        });
+        $.inquirer.prompt([{
+            type: 'list',
+            name: 'task',
+            message: 'What would you like to do?',
+            choices: [
+                {name: 'Build', value: 'build'},
+                {name: 'Watch', value: 'watch'},
+                {name: 'Test', value: 'run-tests'}
+            ],
+            filter: function (val) {
+                return val.toLowerCase();
+            }
+        }]).then(function (taskAnswer) {
+            $.inquirer.prompt([{
+                type: 'checkbox',
+                name: 'apps',
+                message: 'Select apps',
+                choices: choices
+            }]).then(function (appAnswer) {
+                if (appAnswer.apps.length == 1 && appAnswer.apps[0] == 'all') {
+                    opts.apps = apps;
+                } else {
+                    opts.apps = appAnswer.apps;
+                }
+                gulp.start(taskAnswer.task);
+                done();
+            });
+        });
+    });
 };
 

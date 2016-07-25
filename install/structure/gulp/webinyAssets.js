@@ -216,10 +216,6 @@ module.exports = function (gulp, opts, $) {
                 return 'Core/Webiny/webiny/Webiny';
             }
 
-            if (source === 'Webiny/TestSuite') {
-                //return 'Core/Webiny/Modules/Core/TestLib/TestSuite';
-            }
-
             return source;
         }
     };

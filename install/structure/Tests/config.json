@@ -1,0 +1,7 @@
+{
+    "webPath": "http://yourdomain.app:8001",
+    "webdriver": {
+        "browser": "chrome",
+        "tempFolder": "./Tests"
+    }
+}

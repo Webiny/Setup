@@ -183,17 +183,6 @@ module.exports = function (gulp, opts, $) {
                 });
             }
 
-            // Add filtered apps to table
-            jsApps.map(function (a) {
-                appsTable.push([
-                    a.name,
-                    $.util.colors.magenta(a.version || '-'),
-                    a.sourceDir,
-                    a.modules.length,
-                    ''
-                ]);
-            });
-
             return jsApps;
         },
 
@@ -209,7 +198,17 @@ module.exports = function (gulp, opts, $) {
             return new AssetsConfig(assetsConfigs[appObj.name], $);
         },
 
-        showAppsReport: function () {
+        showAppsReport: function (apps) {
+            apps.map(function(a){
+                appsTable.push([
+                    a.name,
+                    $.util.colors.magenta(a.version || '-'),
+                    a.sourceDir,
+                    a.modules.length,
+                    ''
+                ]);
+            });
+
             console.log(appsTable.toString());
         }
     };

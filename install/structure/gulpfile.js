@@ -1,3 +1,4 @@
+/* eslintrc-disable */
 /**
  * DEVELOPMENT:
  * By default, everything is built in development mode, meaning minify and uglify are not executed.
@@ -38,6 +39,8 @@
 require('events').EventEmitter.prototype._maxListeners = 100;
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
+$.glob = require('glob');
+$.inquirer = require('inquirer');
 $.chalk = require('chalk');
 $.del = require('del');
 $.lazypipe = require('lazypipe');
@@ -52,7 +55,7 @@ $.cssImport = require('gulp-cssimport');
 $.babelRegister = require('babel-register');
 $.moment = require('moment');
 
-// Get CLI arguments: gulp build-app --app Backend --production
+// Get CLI arguments
 var opts = require('yargs').argv;
 
 if (!opts.esLint) {
@@ -84,10 +87,6 @@ if ($._.isString(opts.app)) {
             opts.apps.push(a);
         });
     });
-}
-
-if (opts.apps.length == 0) {
-    opts.apps = $.webiny.getApps();
 }
 
 var pipes = require('./gulp/pipes')(gulp, opts, $);
